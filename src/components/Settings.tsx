@@ -11,9 +11,11 @@ interface Props {
 export function Settings({ store, householdId }: Props) {
   const [name, setName] = useState(store.myName ?? '')
 
+  const trimmed = name.trim()
+  const isSaved = store.myName !== null && trimmed === store.myName
+
   const handleSaveName = (event: FormEvent) => {
     event.preventDefault()
-    const trimmed = name.trim()
     if (trimmed) store.saveName(trimmed)
   }
 
@@ -37,10 +39,11 @@ export function Settings({ store, householdId }: Props) {
           <input value={name} onChange={e => setName(e.target.value)} maxLength={40} placeholder="e.g. Abhi" />
         </label>
         <div className="actions">
-          <button type="submit" className="primary" disabled={name.trim() === ''}>
-            Save name
+          <button type="submit" className="primary" disabled={trimmed === '' || isSaved}>
+            {isSaved ? 'Saved' : 'Save name'}
           </button>
         </div>
+        {!isSaved && trimmed !== '' && <p className="muted">Not saved yet.</p>}
       </form>
 
       <section className="card form">
