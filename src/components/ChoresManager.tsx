@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import type { ChoreStore } from '../hooks/useChoreStore'
 import type { Assignee, Chore, ChoreFormValues } from '../types'
-import { ASSIGNEE_LABELS, formatFrequency } from '../lib/labels'
+import { formatFrequency } from '../lib/labels'
 import { ChoreForm } from './ChoreForm'
 
 type Editing = Chore | 'new' | null
 
 export function ChoresManager({ store }: { store: ChoreStore }) {
-  const { data, addChore, updateChore, deleteChore, hasPartner } = store
+  const { data, addChore, updateChore, deleteChore, hasPartner, labels } = store
   const [editing, setEditing] = useState<Editing>(null)
 
   const assignees: Assignee[] = hasPartner ? ['me', 'partner', 'anyone'] : ['me', 'anyone']
@@ -29,6 +29,7 @@ export function ChoresManager({ store }: { store: ChoreStore }) {
           key={editing === 'new' ? 'new' : editing.id}
           initial={editing === 'new' ? undefined : editing}
           assignees={assignees}
+          labels={labels}
           onSubmit={handleSubmit}
           onCancel={() => setEditing(null)}
         />
@@ -44,7 +45,7 @@ export function ChoresManager({ store }: { store: ChoreStore }) {
             <div>
               <strong>{chore.name}</strong>
               <div className="muted">
-                {formatFrequency(chore.frequencyDays)} · {ASSIGNEE_LABELS[chore.assignee]}
+                {formatFrequency(chore.frequencyDays)} · {labels[chore.assignee]}
               </div>
             </div>
             <div className="actions">

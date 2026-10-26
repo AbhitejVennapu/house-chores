@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { summarizeChore, type ChoreSummary } from '../lib/chores'
 import { todayISO } from '../lib/dates'
-import { ASSIGNEE_LABELS, formatDueText, formatFrequency } from '../lib/labels'
+import { formatDueText, formatFrequency } from '../lib/labels'
 import type { ChoreStore } from '../hooks/useChoreStore'
 import type { Assignee } from '../types'
 
@@ -10,7 +10,7 @@ type Filter = Assignee | 'all'
 const FILTERS: Filter[] = ['all', 'me', 'partner', 'anyone']
 
 export function Dashboard({ store }: { store: ChoreStore }) {
-  const { data, markDone } = store
+  const { data, markDone, labels } = store
   const today = todayISO()
   const [filter, setFilter] = useState<Filter>('all')
 
@@ -35,20 +35,27 @@ export function Dashboard({ store }: { store: ChoreStore }) {
       <div className="segmented" role="group" aria-label="Filter by assignee">
         {FILTERS.map(f => (
           <button key={f} aria-pressed={filter === f} className={filter === f ? 'active' : undefined} onClick={() => setFilter(f)}>
-            {f === 'all' ? 'All' : ASSIGNEE_LABELS[f]}
+            {f === 'all' ? 'All' : labels[f]}
           </button>
         ))}
       </div>
 
       {summaries.length === 0 && <p className="empty">Nothing assigned here.</p>}
-      <Section title="Overdue" items={byStatus('overdue')} onDone={onDone} />
-      <Section title="Due today" items={byStatus('today')} onDone={onDone} />
-      <Section title="Upcoming" items={byStatus('upcoming')} onDone={onDone} />
+      <Section title="Overdue" items={byStatus('overdue')} labels={labels} onDone={onDone} />
+      <Section title="Due today" items={byStatus('today')} labels={labels} onDone={onDone} />
+      <Section title="Upcoming" items={byStatus('upcoming')} labels={labels} onDone={onDone} />
     </>
   )
 }
 
-function Section({ title, items, onDone }: { title: string; items: ChoreSummary[]; onDone: (choreId: string) => void }) {
+interface SectionProps {
+  title: string
+  items: ChoreSummary[]
+  labels: ChoreStore['labels']
+  onDone: (choreId: string) => void
+}
+
+function Section({ title, items, labels, onDone }: SectionProps) {
   if (items.length === 0) return null
 
   return (
@@ -60,7 +67,7 @@ function Section({ title, items, onDone }: { title: string; items: ChoreSummary[
             <div>
               <strong>{summary.chore.name}</strong>
               <div className="muted">
-                {formatFrequency(summary.chore.frequencyDays)} · {ASSIGNEE_LABELS[summary.chore.assignee]}
+                {formatFrequency(summary.chore.frequencyDays)} · {labels[summary.chore.assignee]}
               </div>
               <div className="due">{formatDueText(summary)}</div>
             </div>

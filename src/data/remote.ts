@@ -24,6 +24,11 @@ interface MemberRow {
   user_id: string
 }
 
+interface ProfileRow {
+  user_id: string
+  display_name: string
+}
+
 // Converts the app's relative assignee to a database user id.
 const toUserId = (assignee: Assignee, ctx: HouseholdContext): string | null => {
   if (assignee === 'me') return ctx.userId
@@ -36,10 +41,14 @@ const toAssignee = (userId: string | null, ctx: HouseholdContext): Assignee => {
   return userId === ctx.userId ? 'me' : 'partner'
 }
 
-export async function fetchHousehold(
-  householdId: string,
-  userId: string,
-): Promise<{ data: HouseholdData; partnerId: string | null }> {
+export interface HouseholdSnapshot {
+  data: HouseholdData
+  partnerId: string | null
+  myName: string | null
+  partnerName: string | null
+}
+
+export async function fetchHousehold(householdId: string, userId: string): Promise<HouseholdSnapshot> {
   const [choresRes, completionsRes, membersRes] = await Promise.all([
     supabase
       .from('chores')
@@ -61,6 +70,18 @@ export async function fetchHousehold(
     partnerId: members.find(m => m.user_id !== userId)?.user_id ?? null,
   }
 
+  // Names are optional. If the profiles table is missing, the app still works with default labels.
+  const names = new Map<string, string>()
+  const profilesRes = await supabase
+    .from('profiles')
+    .select('user_id, display_name')
+    .in(
+      'user_id',
+      members.map(m => m.user_id),
+    )
+  if (profilesRes.error) console.warn('Could not load display names', profilesRes.error)
+  for (const row of (profilesRes.data ?? []) as ProfileRow[]) names.set(row.user_id, row.display_name)
+
   const chores: Chore[] = ((choresRes.data ?? []) as ChoreRow[]).map(row => ({
     id: row.id,
     name: row.name,
@@ -74,7 +95,17 @@ export async function fetchHousehold(
     doneOn: row.done_on,
   }))
 
-  return { data: { chores, completions }, partnerId: ctx.partnerId }
+  return {
+    data: { chores, completions },
+    partnerId: ctx.partnerId,
+    myName: names.get(userId) ?? null,
+    partnerName: ctx.partnerId ? (names.get(ctx.partnerId) ?? null) : null,
+  }
+}
+
+export async function saveDisplayName(userId: string, displayName: string): Promise<void> {
+  const { error } = await supabase.from('profiles').upsert({ user_id: userId, display_name: displayName })
+  if (error) throw error
 }
 
 export async function insertChore(ctx: HouseholdContext, values: ChoreFormValues): Promise<void> {

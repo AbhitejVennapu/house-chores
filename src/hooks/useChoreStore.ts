@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import * as remote from '../data/remote'
-import type { Chore, ChoreFormValues, HouseholdData } from '../types'
+import { ASSIGNEE_LABELS } from '../lib/labels'
+import type { Assignee, Chore, ChoreFormValues, HouseholdData } from '../types'
 
 export interface ChoreStore {
   data: HouseholdData
   hasPartner: boolean
+  labels: Record<Assignee, string>
+  myName: string | null
   loading: boolean
   error: string | null
   addChore: (values: ChoreFormValues) => void
@@ -13,6 +16,7 @@ export interface ChoreStore {
   deleteChore: (choreId: string) => void
   markDone: (choreId: string, doneOn: string) => void
   deleteCompletion: (completionId: string) => void
+  saveName: (displayName: string) => void
 }
 
 const EMPTY_DATA: HouseholdData = { chores: [], completions: [] }
@@ -22,6 +26,8 @@ const messageOf = (error: unknown) => (error instanceof Error ? error.message : 
 export function useChoreStore(householdId: string, userId: string): ChoreStore {
   const [data, setData] = useState<HouseholdData>(EMPTY_DATA)
   const [partnerId, setPartnerId] = useState<string | null>(null)
+  const [myName, setMyName] = useState<string | null>(null)
+  const [partnerName, setPartnerName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,6 +38,8 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
       const next = await remote.fetchHousehold(householdId, userId)
       setData(next.data)
       setPartnerId(next.partnerId)
+      setMyName(next.myName)
+      setPartnerName(next.partnerName)
       setError(null)
     } catch (err) {
       setError(messageOf(err))
@@ -58,9 +66,17 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
     operation().then(reload).catch(err => setError(messageOf(err)))
   }
 
+  const labels: Record<Assignee, string> = {
+    me: myName ?? ASSIGNEE_LABELS.me,
+    partner: partnerName ?? ASSIGNEE_LABELS.partner,
+    anyone: ASSIGNEE_LABELS.anyone,
+  }
+
   return {
     data,
     hasPartner: partnerId !== null,
+    labels,
+    myName,
     loading,
     error,
     addChore: values => write(() => remote.insertChore(ctx, values)),
@@ -68,5 +84,6 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
     deleteChore: choreId => write(() => remote.deleteChore(choreId)),
     markDone: (choreId, doneOn) => write(() => remote.insertCompletion(ctx, choreId, doneOn)),
     deleteCompletion: completionId => write(() => remote.deleteCompletion(completionId)),
+    saveName: displayName => write(() => remote.saveDisplayName(userId, displayName)),
   }
 }

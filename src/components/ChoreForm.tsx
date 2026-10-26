@@ -1,17 +1,17 @@
 import { useState, type FormEvent } from 'react'
 import type { Assignee, Chore, ChoreFormValues } from '../types'
-import { ASSIGNEE_LABELS } from '../lib/labels'
 
 type Unit = 'days' | 'weeks'
 
 interface Props {
   initial?: Chore
   assignees: Assignee[]
+  labels: Record<Assignee, string>
   onSubmit: (values: ChoreFormValues) => void
   onCancel: () => void
 }
 
-export function ChoreForm({ initial, assignees, onSubmit, onCancel }: Props) {
+export function ChoreForm({ initial, assignees, labels, onSubmit, onCancel }: Props) {
   const initialIsWeeks = initial !== undefined && initial.frequencyDays >= 7 && initial.frequencyDays % 7 === 0
 
   const [name, setName] = useState(initial?.name ?? '')
@@ -74,7 +74,7 @@ export function ChoreForm({ initial, assignees, onSubmit, onCancel }: Props) {
         <select value={assignee} onChange={e => setAssignee(e.target.value as Assignee)}>
           {assignees.map(key => (
             <option key={key} value={key}>
-              {ASSIGNEE_LABELS[key]}
+              {labels[key]}
             </option>
           ))}
         </select>
