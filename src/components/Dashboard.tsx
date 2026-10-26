@@ -24,7 +24,12 @@ export function Dashboard({ store }: { store: ChoreStore }) {
   )
 
   if (data.chores.length === 0) {
-    return <p className="empty">No chores yet. Add some in the Chores tab.</p>
+    return (
+      <div className="hc-empty">
+        <p className="hc-empty-title">No chores yet</p>
+        <p className="hc-empty-text">Add your first chore in the Chores tab.</p>
+      </div>
+    )
   }
 
   const byStatus = (status: ChoreSummary['status']) => summaries.filter(s => s.status === status)
@@ -32,15 +37,19 @@ export function Dashboard({ store }: { store: ChoreStore }) {
 
   return (
     <>
-      <div className="segmented" role="group" aria-label="Filter by assignee">
+      <div className="hc-chips" role="group" aria-label="Filter by person">
         {FILTERS.map(f => (
-          <button key={f} aria-pressed={filter === f} className={filter === f ? 'active' : undefined} onClick={() => setFilter(f)}>
+          <button key={f} type="button" className="hc-chip" aria-pressed={filter === f} onClick={() => setFilter(f)}>
             {f === 'all' ? 'All' : labels[f]}
           </button>
         ))}
       </div>
 
-      {summaries.length === 0 && <p className="empty">Nothing assigned here.</p>}
+      {summaries.length === 0 && (
+        <div className="hc-empty">
+          <p className="hc-empty-text">Nothing assigned here.</p>
+        </div>
+      )}
       <Section title="Overdue" items={byStatus('overdue')} labels={labels} onDone={onDone} />
       <Section title="Due today" items={byStatus('today')} labels={labels} onDone={onDone} />
       <Section title="Upcoming" items={byStatus('upcoming')} labels={labels} onDone={onDone} />
@@ -60,22 +69,31 @@ function Section({ title, items, labels, onDone }: SectionProps) {
 
   return (
     <section>
-      <h2>{title}</h2>
-      <ul className="list">
-        {items.map(summary => (
-          <li key={summary.chore.id} className={`card status-${summary.status}`}>
-            <div>
-              <strong>{summary.chore.name}</strong>
-              <div className="muted">
-                {formatFrequency(summary.chore.frequencyDays)} · {labels[summary.chore.assignee]}
+      <h2 className="hc-label">{title}</h2>
+      <ul className="hc-list">
+        {items.map(summary => {
+          const status = summary.status
+          const cardClass = status === 'overdue' ? 'is-overdue' : status === 'today' ? 'is-today' : ''
+          const badgeClass = status === 'overdue' ? 'is-overdue' : status === 'today' ? 'is-today' : ''
+          return (
+            <li key={summary.chore.id} className={`hc-chore ${cardClass}`}>
+              <div className="hc-chore-body">
+                <p className="hc-chore-name">{summary.chore.name}</p>
+                <span className={`hc-badge ${badgeClass}`}>{formatDueText(summary)}</span>
+                <span className="hc-chore-meta">
+                  {formatFrequency(summary.chore.frequencyDays)} · {labels[summary.chore.assignee]}
+                </span>
               </div>
-              <div className="due">{formatDueText(summary)}</div>
-            </div>
-            <button className="primary" onClick={() => onDone(summary.chore.id)}>
-              Done
-            </button>
-          </li>
-        ))}
+              <button
+                type="button"
+                className={`hc-btn ${status === 'upcoming' ? 'hc-btn--secondary' : 'hc-btn--primary'}`}
+                onClick={() => onDone(summary.chore.id)}
+              >
+                Done
+              </button>
+            </li>
+          )
+        })}
       </ul>
     </section>
   )

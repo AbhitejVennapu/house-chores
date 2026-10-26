@@ -4,6 +4,11 @@ import * as remote from '../data/remote'
 import { ASSIGNEE_LABELS } from '../lib/labels'
 import type { Assignee, Chore, ChoreFormValues, HouseholdData } from '../types'
 
+export interface DoneToast {
+  completionId: string
+  choreName: string
+}
+
 export interface ChoreStore {
   data: HouseholdData
   hasPartner: boolean
@@ -11,15 +16,19 @@ export interface ChoreStore {
   myName: string | null
   loading: boolean
   error: string | null
+  toast: DoneToast | null
   addChore: (values: ChoreFormValues) => void
   updateChore: (chore: Chore) => void
   deleteChore: (choreId: string) => void
   markDone: (choreId: string, doneOn: string) => void
+  undoToast: () => void
+  dismissToast: () => void
   deleteCompletion: (completionId: string) => void
   saveName: (displayName: string) => void
 }
 
 const EMPTY_DATA: HouseholdData = { chores: [], completions: [] }
+const TOAST_MS = 4000
 
 const messageOf = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
@@ -30,6 +39,7 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
   const [partnerName, setPartnerName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [toast, setToast] = useState<DoneToast | null>(null)
 
   const ctx = useMemo(() => ({ householdId, userId, partnerId }), [householdId, userId, partnerId])
 
@@ -62,6 +72,13 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
     }
   }, [householdId, reload])
 
+  // The Done toast hides itself after a few seconds.
+  useEffect(() => {
+    if (!toast) return
+    const timer = window.setTimeout(() => setToast(null), TOAST_MS)
+    return () => window.clearTimeout(timer)
+  }, [toast])
+
   const write = (operation: () => Promise<void>) => {
     operation().then(reload).catch(err => setError(messageOf(err)))
   }
@@ -72,6 +89,24 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
     anyone: ASSIGNEE_LABELS.anyone,
   }
 
+  const markDone = (choreId: string, doneOn: string) => {
+    const choreName = data.chores.find(c => c.id === choreId)?.name ?? 'Chore'
+    remote
+      .insertCompletion(ctx, choreId, doneOn)
+      .then(completionId => {
+        setToast({ completionId, choreName })
+        return reload()
+      })
+      .catch(err => setError(messageOf(err)))
+  }
+
+  const undoToast = () => {
+    if (!toast) return
+    const { completionId } = toast
+    setToast(null)
+    write(() => remote.deleteCompletion(completionId))
+  }
+
   return {
     data,
     hasPartner: partnerId !== null,
@@ -79,10 +114,13 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
     myName,
     loading,
     error,
+    toast,
     addChore: values => write(() => remote.insertChore(ctx, values)),
     updateChore: chore => write(() => remote.updateChore(ctx, chore)),
     deleteChore: choreId => write(() => remote.deleteChore(choreId)),
-    markDone: (choreId, doneOn) => write(() => remote.insertCompletion(ctx, choreId, doneOn)),
+    markDone,
+    undoToast,
+    dismissToast: () => setToast(null),
     deleteCompletion: completionId => write(() => remote.deleteCompletion(completionId)),
     saveName: displayName => write(() => remote.saveDisplayName(userId, displayName)),
   }

@@ -24,22 +24,18 @@ export function App({ householdId, userId }: Props) {
   const [tab, setTab] = useState<Tab>('dashboard')
 
   return (
-    <div className="app">
-      <header>
-        <h1>House Chores</h1>
-        <nav className="tabs" aria-label="Sections">
-          {TABS.map(t => (
-            <button key={t.id} aria-current={tab === t.id ? 'page' : undefined} onClick={() => setTab(t.id)}>
-              {t.label}
-            </button>
-          ))}
-        </nav>
+    <div className="hc-app">
+      <header className="hc-header">
+        <h1 className="hc-title">House Chores</h1>
       </header>
 
       <main>
-        {store.error && <p className="error">{store.error}</p>}
+        {store.error && <p className="hc-error">{store.error}</p>}
         {store.loading ? (
-          <p className="empty">Loading…</p>
+          <div className="hc-list">
+            <div className="hc-skeleton" />
+            <div className="hc-skeleton" />
+          </div>
         ) : (
           <>
             {tab === 'dashboard' && <Dashboard store={store} />}
@@ -49,6 +45,29 @@ export function App({ householdId, userId }: Props) {
           </>
         )}
       </main>
+
+      {store.toast && (
+        <div className="hc-toast" role="status">
+          <span className="hc-toast-msg">{store.toast.choreName} marked done</span>
+          <button className="hc-toast-action" onClick={store.undoToast}>
+            Undo
+          </button>
+        </div>
+      )}
+
+      <nav className="hc-tabs" aria-label="Sections" role="tablist">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            role="tab"
+            className="hc-tab"
+            aria-selected={tab === t.id}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
     </div>
   )
 }

@@ -43,53 +43,82 @@ export function ChoreForm({ initial, assignees, labels, onSubmit, onCancel }: Pr
   }
 
   return (
-    <form className="card form" onSubmit={handleSubmit}>
-      <label>
-        Name
-        <input value={name} onChange={e => setName(e.target.value)} placeholder="Laundry" autoFocus />
-      </label>
-
-      <div className="row-inline">
-        <label>
-          Every
+    <section className="hc-card">
+      <h2 className="hc-card-title">{initial ? 'Edit chore' : 'New chore'}</h2>
+      <form className="hc-form" onSubmit={handleSubmit}>
+        <div className={`hc-field ${error === 'Give the chore a name.' ? 'is-invalid' : ''}`}>
+          <label className="hc-field-label" htmlFor="chore-name">
+            Name
+          </label>
           <input
-            type="number"
-            min={1}
-            inputMode="numeric"
-            value={amount}
-            onChange={e => setAmount(e.target.value)}
+            id="chore-name"
+            className="hc-input"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="Laundry"
+            autoFocus
           />
-        </label>
-        <label>
-          Unit
-          <select value={unit} onChange={e => setUnit(e.target.value as Unit)}>
-            <option value="days">days</option>
-            <option value="weeks">weeks</option>
-          </select>
-        </label>
-      </div>
+        </div>
 
-      <label>
-        Assigned to
-        <select value={assignee} onChange={e => setAssignee(e.target.value as Assignee)}>
-          {assignees.map(key => (
-            <option key={key} value={key}>
-              {labels[key]}
-            </option>
-          ))}
-        </select>
-      </label>
+        <div className="hc-form-row">
+          <div className="hc-field">
+            <label className="hc-field-label" htmlFor="chore-every">
+              Every
+            </label>
+            <input
+              id="chore-every"
+              className="hc-input"
+              type="number"
+              min={1}
+              inputMode="numeric"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+            />
+          </div>
+          <div className="hc-field">
+            <label className="hc-field-label" htmlFor="chore-unit">
+              Unit
+            </label>
+            <div className="hc-select-wrap">
+              <select id="chore-unit" className="hc-select" value={unit} onChange={e => setUnit(e.target.value as Unit)}>
+                <option value="days">days</option>
+                <option value="weeks">weeks</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
-      {error && <p className="error">{error}</p>}
+        <div className="hc-field">
+          <label className="hc-field-label" htmlFor="chore-assignee">
+            Assigned to
+          </label>
+          <div className="hc-select-wrap">
+            <select
+              id="chore-assignee"
+              className="hc-select"
+              value={assignee}
+              onChange={e => setAssignee(e.target.value as Assignee)}
+            >
+              {assignees.map(key => (
+                <option key={key} value={key}>
+                  {labels[key]}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-      <div className="actions">
-        <button type="submit" className="primary">
-          Save
-        </button>
-        <button type="button" onClick={onCancel}>
-          Cancel
-        </button>
-      </div>
-    </form>
+        {error && <p className="hc-error">{error}</p>}
+
+        <div className="hc-form-actions">
+          <button type="button" className="hc-btn hc-btn--secondary" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="submit" className="hc-btn hc-btn--primary">
+            Save
+          </button>
+        </div>
+      </form>
+    </section>
   )
 }

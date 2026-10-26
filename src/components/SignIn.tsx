@@ -19,27 +19,35 @@ export function SignIn() {
 
   if (sent) {
     return (
-      <section className="card form">
-        <h2>Check your email</h2>
-        <p className="muted">Open the sign-in link we sent to {email.trim()} on this device.</p>
+      <section className="hc-card hc-form" style={{ marginTop: 48 }}>
+        <h2 className="hc-card-title">Check your email</h2>
+        <p className="hc-field-hint">Open the sign-in link we sent to {email.trim()} on this device.</p>
       </section>
     )
   }
 
   return (
-    <form className="card form" onSubmit={handleSubmit}>
-      <h2>Sign in</h2>
-      <p className="muted">We'll email you a sign-in link. No password needed.</p>
-      <label>
-        Email
-        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
-      </label>
-      {error && <p className="error">{error}</p>}
-      <div className="actions">
-        <button type="submit" className="primary">
-          Send link
-        </button>
+    <form className="hc-card hc-form" style={{ marginTop: 48 }} onSubmit={handleSubmit}>
+      <h2 className="hc-card-title">Sign in</h2>
+      <p className="hc-field-hint">We'll email you a sign-in link. No password needed.</p>
+      <div className="hc-field">
+        <label className="hc-field-label" htmlFor="email">
+          Email
+        </label>
+        <input
+          id="email"
+          className="hc-input"
+          type="email"
+          required
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          autoComplete="email"
+        />
       </div>
+      {error && <p className="hc-error">{error}</p>}
+      <button type="submit" className="hc-btn hc-btn--primary hc-btn--block">
+        Send link
+      </button>
     </form>
   )
 }

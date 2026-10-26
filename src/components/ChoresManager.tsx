@@ -22,41 +22,50 @@ export function ChoresManager({ store }: { store: ChoreStore }) {
     if (confirm(`Delete "${chore.name}" and its history?`)) deleteChore(chore.id)
   }
 
+  if (editing) {
+    return (
+      <ChoreForm
+        key={editing === 'new' ? 'new' : editing.id}
+        initial={editing === 'new' ? undefined : editing}
+        assignees={assignees}
+        labels={labels}
+        onSubmit={handleSubmit}
+        onCancel={() => setEditing(null)}
+      />
+    )
+  }
+
   return (
     <>
-      {editing ? (
-        <ChoreForm
-          key={editing === 'new' ? 'new' : editing.id}
-          initial={editing === 'new' ? undefined : editing}
-          assignees={assignees}
-          labels={labels}
-          onSubmit={handleSubmit}
-          onCancel={() => setEditing(null)}
-        />
-      ) : (
-        <button className="primary" onClick={() => setEditing('new')}>
-          Add chore
-        </button>
-      )}
+      <button type="button" className="hc-btn hc-btn--primary hc-btn--block" onClick={() => setEditing('new')}>
+        Add chore
+      </button>
 
-      <ul className="list">
-        {data.chores.map(chore => (
-          <li key={chore.id} className="card">
-            <div>
-              <strong>{chore.name}</strong>
-              <div className="muted">
-                {formatFrequency(chore.frequencyDays)} · {labels[chore.assignee]}
+      {data.chores.length === 0 ? (
+        <div className="hc-empty" style={{ marginTop: 16 }}>
+          <p className="hc-empty-title">No chores yet</p>
+          <p className="hc-empty-text">Add the things you share, like bins, laundry, or the dishwasher.</p>
+        </div>
+      ) : (
+        <ul className="hc-list" style={{ marginTop: 16 }}>
+          {data.chores.map(chore => (
+            <li key={chore.id} className="hc-chore">
+              <div className="hc-chore-body">
+                <p className="hc-chore-name">{chore.name}</p>
+                <span className="hc-chore-meta">
+                  {formatFrequency(chore.frequencyDays)} · {labels[chore.assignee]}
+                </span>
               </div>
-            </div>
-            <div className="actions">
-              <button onClick={() => setEditing(chore)}>Edit</button>
-              <button className="danger" onClick={() => handleDelete(chore)}>
+              <button type="button" className="hc-btn hc-btn--secondary" onClick={() => setEditing(chore)}>
+                Edit
+              </button>
+              <button type="button" className="hc-btn hc-btn--danger" onClick={() => handleDelete(chore)}>
                 Delete
               </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </>
   )
 }

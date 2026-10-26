@@ -7,18 +7,25 @@ export function History({ store }: { store: ChoreStore }) {
   const rows = [...data.completions].sort((a, b) => b.doneOn.localeCompare(a.doneOn))
 
   if (rows.length === 0) {
-    return <p className="empty">Nothing completed yet.</p>
+    return (
+      <div className="hc-empty">
+        <p className="hc-empty-title">Nothing completed yet</p>
+        <p className="hc-empty-text">Chores you mark done will show up here.</p>
+      </div>
+    )
   }
 
   return (
-    <ul className="list">
+    <ul className="hc-list">
       {rows.map(row => (
-        <li key={row.id} className="card">
-          <div>
-            <strong>{names.get(row.choreId) ?? 'Deleted chore'}</strong>
-            <div className="muted">{formatDate(row.doneOn)}</div>
+        <li key={row.id} className="hc-chore">
+          <div className="hc-chore-body">
+            <p className="hc-chore-name">{names.get(row.choreId) ?? 'Deleted chore'}</p>
+            <span className="hc-chore-meta">{formatDate(row.doneOn)}</span>
           </div>
-          <button onClick={() => deleteCompletion(row.id)}>Undo</button>
+          <button type="button" className="hc-btn hc-btn--secondary" onClick={() => deleteCompletion(row.id)}>
+            Undo
+          </button>
         </li>
       ))}
     </ul>

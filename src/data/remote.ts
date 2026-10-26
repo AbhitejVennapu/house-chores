@@ -135,13 +135,18 @@ export async function deleteChore(choreId: string): Promise<void> {
   if (error) throw error
 }
 
-export async function insertCompletion(ctx: HouseholdContext, choreId: string, doneOn: string): Promise<void> {
-  const { error } = await supabase.from('completions').insert({
-    household_id: ctx.householdId,
-    chore_id: choreId,
-    done_on: doneOn,
-  })
+export async function insertCompletion(ctx: HouseholdContext, choreId: string, doneOn: string): Promise<string> {
+  const { data, error } = await supabase
+    .from('completions')
+    .insert({
+      household_id: ctx.householdId,
+      chore_id: choreId,
+      done_on: doneOn,
+    })
+    .select('id')
+    .single()
   if (error) throw error
+  return (data as { id: string }).id
 }
 
 export async function deleteCompletion(completionId: string): Promise<void> {
