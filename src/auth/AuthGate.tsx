@@ -6,7 +6,7 @@ import { SignIn } from '../components/SignIn'
 import { HouseholdSetup } from '../components/HouseholdSetup'
 
 const Loading = () => (
-  <div className="hc-app">
+  <div className="hc-screen">
     <div className="hc-skeleton" style={{ marginTop: 48 }} />
   </div>
 )
@@ -37,9 +37,9 @@ export function AuthGate() {
   }, [session])
 
   if (session === undefined) return <Loading />
-  if (session === null) return <div className="hc-app"><SignIn /></div>
+  if (session === null) return <SignIn />
   if (householdId === undefined) return <Loading />
-  if (householdId === null) return <div className="hc-app"><HouseholdSetup onReady={setHouseholdId} /></div>
+  if (householdId === null) return <HouseholdSetup onReady={setHouseholdId} />
 
   return <App householdId={householdId} userId={session.user.id} />
 }

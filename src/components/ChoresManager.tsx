@@ -11,6 +11,7 @@ export function ChoresManager({ store }: { store: ChoreStore }) {
   const [editing, setEditing] = useState<Editing>(null)
 
   const assignees: Assignee[] = hasPartner ? ['me', 'partner', 'anyone'] : ['me', 'anyone']
+  const count = data.chores.length
 
   const handleSubmit = (values: ChoreFormValues) => {
     if (editing === 'new') addChore(values)
@@ -22,49 +23,56 @@ export function ChoresManager({ store }: { store: ChoreStore }) {
     if (confirm(`Delete "${chore.name}" and its history?`)) deleteChore(chore.id)
   }
 
-  if (editing) {
-    return (
-      <ChoreForm
-        key={editing === 'new' ? 'new' : editing.id}
-        initial={editing === 'new' ? undefined : editing}
-        assignees={assignees}
-        labels={labels}
-        onSubmit={handleSubmit}
-        onCancel={() => setEditing(null)}
-      />
-    )
-  }
-
   return (
     <>
-      <button type="button" className="hc-btn hc-btn--primary hc-btn--block" onClick={() => setEditing('new')}>
-        Add chore
-      </button>
+      <header className="hc-page-head">
+        <p className="hc-kicker">Shared between you</p>
+        <h1 className="hc-h1">Chores</h1>
+        <p className="hc-lede">{count === 1 ? '1 chore in total' : `${count} chores in total`}</p>
+      </header>
 
-      {data.chores.length === 0 ? (
-        <div className="hc-empty" style={{ marginTop: 16 }}>
-          <p className="hc-empty-title">No chores yet</p>
-          <p className="hc-empty-text">Add the things you share, like bins, laundry, or the dishwasher.</p>
-        </div>
+      {editing ? (
+        <ChoreForm
+          key={editing === 'new' ? 'new' : editing.id}
+          initial={editing === 'new' ? undefined : editing}
+          assignees={assignees}
+          labels={labels}
+          onSubmit={handleSubmit}
+          onCancel={() => setEditing(null)}
+        />
       ) : (
-        <ul className="hc-list" style={{ marginTop: 16 }}>
-          {data.chores.map(chore => (
-            <li key={chore.id} className="hc-chore">
-              <div className="hc-chore-body">
-                <p className="hc-chore-name">{chore.name}</p>
-                <span className="hc-chore-meta">
-                  {formatFrequency(chore.frequencyDays)} · {labels[chore.assignee]}
-                </span>
+        <button type="button" className="hc-btn hc-btn--primary hc-btn--block" onClick={() => setEditing('new')}>
+          Add chore
+        </button>
+      )}
+
+      {count > 0 && (
+        <section className="hc-group" aria-labelledby="all-chores">
+          <div className="hc-group-head">
+            <h2 className="hc-group-title" id="all-chores">
+              All chores
+            </h2>
+            <span className="hc-group-count">{count}</span>
+          </div>
+          <div className="hc-card">
+            {data.chores.map(chore => (
+              <div key={chore.id} className="hc-item">
+                <div className="hc-item-main">
+                  <p className="hc-item-name">{chore.name}</p>
+                  <span className="hc-item-meta">
+                    {formatFrequency(chore.frequencyDays)} · {labels[chore.assignee]}
+                  </span>
+                </div>
+                <button type="button" className="hc-btn hc-btn--quiet" onClick={() => setEditing(chore)}>
+                  Edit
+                </button>
+                <button type="button" className="hc-btn hc-btn--danger" onClick={() => handleDelete(chore)}>
+                  Delete
+                </button>
               </div>
-              <button type="button" className="hc-btn hc-btn--secondary" onClick={() => setEditing(chore)}>
-                Edit
-              </button>
-              <button type="button" className="hc-btn hc-btn--danger" onClick={() => handleDelete(chore)}>
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+        </section>
       )}
     </>
   )

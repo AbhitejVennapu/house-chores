@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
 import { summarizeChore, type ChoreSummary } from '../lib/chores'
-import { todayISO } from '../lib/dates'
+import { todayISO, parseISODate } from '../lib/dates'
 import { formatDueText, formatFrequency } from '../lib/labels'
 import type { ChoreStore } from '../hooks/useChoreStore'
 import type { Assignee } from '../types'
+import { CheckIcon } from './icons'
 
 type Filter = Assignee | 'all'
 
@@ -23,78 +24,102 @@ export function Dashboard({ store }: { store: ChoreStore }) {
     [data, today, filter],
   )
 
+  const overdueCount = summaries.filter(s => s.status === 'overdue').length
+  const todayCount = summaries.filter(s => s.status === 'today').length
+  const weekday = parseISODate(today).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
+
   if (data.chores.length === 0) {
     return (
-      <div className="hc-empty">
-        <p className="hc-empty-title">No chores yet</p>
-        <p className="hc-empty-text">Add your first chore in the Chores tab.</p>
-      </div>
+      <>
+        <PageHead kicker={weekday} title="Today" lede="No chores yet" />
+        <div className="hc-empty" style={{ marginTop: 24 }}>
+          <div className="hc-empty-icon">
+            <CheckIcon />
+          </div>
+          <p className="hc-empty-title">Nothing to track yet</p>
+          <p className="hc-empty-text">Add your first chore in the Chores tab.</p>
+        </div>
+      </>
     )
   }
 
-  const byStatus = (status: ChoreSummary['status']) => summaries.filter(s => s.status === status)
   const onDone = (choreId: string) => markDone(choreId, today)
 
   return (
     <>
-      <div className="hc-chips" role="group" aria-label="Filter by person">
+      <PageHead kicker={weekday} title="Today" lede={`${overdueCount} overdue · ${todayCount} due today`} />
+
+      <div className="hc-filter" role="group" aria-label="Filter by person">
         {FILTERS.map(f => (
-          <button key={f} type="button" className="hc-chip" aria-pressed={filter === f} onClick={() => setFilter(f)}>
+          <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)}>
             {f === 'all' ? 'All' : labels[f]}
           </button>
         ))}
       </div>
 
-      {summaries.length === 0 && (
-        <div className="hc-empty">
-          <p className="hc-empty-text">Nothing assigned here.</p>
-        </div>
-      )}
-      <Section title="Overdue" items={byStatus('overdue')} labels={labels} onDone={onDone} />
-      <Section title="Due today" items={byStatus('today')} labels={labels} onDone={onDone} />
-      <Section title="Upcoming" items={byStatus('upcoming')} labels={labels} onDone={onDone} />
+      {summaries.length === 0 && <p className="hc-status-line" style={{ marginTop: 24 }}>Nothing assigned here.</p>}
+      <Group title="Overdue" items={summaries.filter(s => s.status === 'overdue')} labels={labels} onDone={onDone} />
+      <Group title="Due today" items={summaries.filter(s => s.status === 'today')} labels={labels} onDone={onDone} />
+      <Group title="Upcoming" items={summaries.filter(s => s.status === 'upcoming')} labels={labels} onDone={onDone} />
     </>
   )
 }
 
-interface SectionProps {
+function PageHead({ kicker, title, lede }: { kicker: string; title: string; lede: string }) {
+  return (
+    <header className="hc-page-head">
+      <p className="hc-kicker">{kicker}</p>
+      <h1 className="hc-h1">{title}</h1>
+      <p className="hc-lede">{lede}</p>
+    </header>
+  )
+}
+
+interface GroupProps {
   title: string
   items: ChoreSummary[]
   labels: ChoreStore['labels']
   onDone: (choreId: string) => void
 }
 
-function Section({ title, items, labels, onDone }: SectionProps) {
+function Group({ title, items, labels, onDone }: GroupProps) {
   if (items.length === 0) return null
 
   return (
-    <section>
-      <h2 className="hc-label">{title}</h2>
-      <ul className="hc-list">
-        {items.map(summary => {
-          const status = summary.status
-          const cardClass = status === 'overdue' ? 'is-overdue' : status === 'today' ? 'is-today' : ''
-          const badgeClass = status === 'overdue' ? 'is-overdue' : status === 'today' ? 'is-today' : ''
-          return (
-            <li key={summary.chore.id} className={`hc-chore ${cardClass}`}>
-              <div className="hc-chore-body">
-                <p className="hc-chore-name">{summary.chore.name}</p>
-                <span className={`hc-badge ${badgeClass}`}>{formatDueText(summary)}</span>
-                <span className="hc-chore-meta">
-                  {formatFrequency(summary.chore.frequencyDays)} · {labels[summary.chore.assignee]}
-                </span>
-              </div>
-              <button
-                type="button"
-                className={`hc-btn ${status === 'upcoming' ? 'hc-btn--secondary' : 'hc-btn--primary'}`}
-                onClick={() => onDone(summary.chore.id)}
-              >
-                Done
-              </button>
-            </li>
-          )
-        })}
-      </ul>
+    <section className="hc-group" aria-labelledby={`group-${title}`}>
+      <div className="hc-group-head">
+        <h2 className="hc-group-title" id={`group-${title}`}>
+          {title}
+        </h2>
+        <span className="hc-group-count">{items.length}</span>
+      </div>
+      <div className="hc-card">
+        {items.map(summary => (
+          <div key={summary.chore.id} className="hc-item">
+            <div className="hc-item-main">
+              <p className="hc-item-name">{summary.chore.name}</p>
+              <span className={`hc-status ${statusClass(summary)}`}>{formatDueText(summary)}</span>
+              <span className="hc-item-meta">
+                {formatFrequency(summary.chore.frequencyDays)} · {labels[summary.chore.assignee]}
+              </span>
+            </div>
+            <button
+              type="button"
+              className={`hc-done ${summary.status === 'upcoming' ? '' : 'is-primary'}`}
+              onClick={() => onDone(summary.chore.id)}
+            >
+              <CheckIcon />
+              Done
+            </button>
+          </div>
+        ))}
+      </div>
     </section>
   )
+}
+
+function statusClass({ status, daysUntilDue }: ChoreSummary): string {
+  if (status === 'overdue') return 'is-overdue'
+  if (status === 'today') return 'is-today'
+  return daysUntilDue > 3 ? 'is-quiet' : ''
 }

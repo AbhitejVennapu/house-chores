@@ -43,11 +43,13 @@ export function ChoreForm({ initial, assignees, labels, onSubmit, onCancel }: Pr
   }
 
   return (
-    <section className="hc-card">
-      <h2 className="hc-card-title">{initial ? 'Edit chore' : 'New chore'}</h2>
+    <section className="hc-card" style={{ marginTop: 20 }}>
+      <h2 className="hc-group-title" style={{ padding: '18px 20px 0' }}>
+        {initial ? 'Edit chore' : 'New chore'}
+      </h2>
       <form className="hc-form" onSubmit={handleSubmit}>
         <div className={`hc-field ${error === 'Give the chore a name.' ? 'is-invalid' : ''}`}>
-          <label className="hc-field-label" htmlFor="chore-name">
+          <label className="hc-label" htmlFor="chore-name">
             Name
           </label>
           <input
@@ -58,13 +60,14 @@ export function ChoreForm({ initial, assignees, labels, onSubmit, onCancel }: Pr
             placeholder="Laundry"
             autoFocus
           />
+          {error === 'Give the chore a name.' && <p className="hc-error">{error}</p>}
         </div>
 
-        <div className="hc-form-row">
-          <div className="hc-field">
-            <label className="hc-field-label" htmlFor="chore-every">
-              Every
-            </label>
+        <div className="hc-field">
+          <label className="hc-label" htmlFor="chore-every">
+            Repeat every
+          </label>
+          <div className="hc-stepper">
             <input
               id="chore-every"
               className="hc-input"
@@ -73,49 +76,53 @@ export function ChoreForm({ initial, assignees, labels, onSubmit, onCancel }: Pr
               inputMode="numeric"
               value={amount}
               onChange={e => setAmount(e.target.value)}
+              style={{ textAlign: 'center' }}
             />
-          </div>
-          <div className="hc-field">
-            <label className="hc-field-label" htmlFor="chore-unit">
-              Unit
-            </label>
-            <div className="hc-select-wrap">
-              <select id="chore-unit" className="hc-select" value={unit} onChange={e => setUnit(e.target.value as Unit)}>
-                <option value="days">days</option>
-                <option value="weeks">weeks</option>
-              </select>
+            <div className="hc-choices" role="radiogroup" aria-label="Unit">
+              {(['days', 'weeks'] as Unit[]).map(u => (
+                <button
+                  key={u}
+                  type="button"
+                  role="radio"
+                  className="hc-choice"
+                  aria-checked={unit === u}
+                  onClick={() => setUnit(u)}
+                >
+                  {u === 'days' ? 'Days' : 'Weeks'}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
         <div className="hc-field">
-          <label className="hc-field-label" htmlFor="chore-assignee">
+          <span className="hc-label" id="assigned-to">
             Assigned to
-          </label>
-          <div className="hc-select-wrap">
-            <select
-              id="chore-assignee"
-              className="hc-select"
-              value={assignee}
-              onChange={e => setAssignee(e.target.value as Assignee)}
-            >
-              {assignees.map(key => (
-                <option key={key} value={key}>
-                  {labels[key]}
-                </option>
-              ))}
-            </select>
+          </span>
+          <div className="hc-choices" role="radiogroup" aria-labelledby="assigned-to">
+            {assignees.map(key => (
+              <button
+                key={key}
+                type="button"
+                role="radio"
+                className="hc-choice"
+                aria-checked={assignee === key}
+                onClick={() => setAssignee(key)}
+              >
+                {labels[key]}
+              </button>
+            ))}
           </div>
         </div>
 
-        {error && <p className="hc-error">{error}</p>}
+        {error && error !== 'Give the chore a name.' && <p className="hc-error">{error}</p>}
 
-        <div className="hc-form-actions">
-          <button type="button" className="hc-btn hc-btn--secondary" onClick={onCancel}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 10, marginTop: 4 }}>
+          <button type="button" className="hc-btn hc-btn--outline" onClick={onCancel}>
             Cancel
           </button>
           <button type="submit" className="hc-btn hc-btn--primary">
-            Save
+            Save chore
           </button>
         </div>
       </form>

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
+import { BrandIcon } from './icons'
 
 interface Props {
   onReady: (householdId: string) => void
@@ -31,34 +32,42 @@ export function HouseholdSetup({ onReady }: Props) {
   }
 
   return (
-    <section className="hc-card hc-form" style={{ marginTop: 48 }}>
-      <h2 className="hc-card-title">Set up your household</h2>
-      <p className="hc-field-hint">
-        Create a household if you're first. If your partner already created one, paste its ID to join.
-      </p>
-      <button type="button" className="hc-btn hc-btn--primary hc-btn--block" onClick={handleCreate} disabled={busy}>
-        Create household
-      </button>
-
-      <form onSubmit={handleJoin} className="hc-form">
-        <div className="hc-field">
-          <label className="hc-field-label" htmlFor="household-id">
-            Household ID
-          </label>
-          <input
-            id="household-id"
-            className="hc-input"
-            value={joinId}
-            onChange={e => setJoinId(e.target.value)}
-            placeholder="xxxxxxxx-xxxx-…"
-          />
+    <div className="hc-screen" style={{ paddingTop: 40 }}>
+      <div style={{ display: 'grid', gap: 14, justifyItems: 'start', marginBottom: 32 }}>
+        <div className="hc-brand">
+          <BrandIcon />
         </div>
-        <button type="submit" className="hc-btn hc-btn--secondary hc-btn--block" disabled={busy || joinId.trim() === ''}>
-          Join household
-        </button>
-      </form>
+        <div>
+          <h1 className="hc-h1">Set up your household</h1>
+          <p className="hc-lede">Create one if you're first. If your partner already did, paste their ID to join.</p>
+        </div>
+      </div>
 
-      {error && <p className="hc-error">{error}</p>}
-    </section>
+      <section className="hc-card hc-form">
+        <button type="button" className="hc-btn hc-btn--primary hc-btn--block" onClick={handleCreate} disabled={busy}>
+          Create household
+        </button>
+
+        <form onSubmit={handleJoin} className="hc-form" style={{ padding: 0 }}>
+          <div className="hc-field">
+            <label className="hc-label" htmlFor="household-id">
+              Household ID
+            </label>
+            <input
+              id="household-id"
+              className="hc-input"
+              value={joinId}
+              onChange={e => setJoinId(e.target.value)}
+              placeholder="xxxxxxxx-xxxx-…"
+            />
+          </div>
+          <button type="submit" className="hc-btn hc-btn--outline hc-btn--block" disabled={busy || joinId.trim() === ''}>
+            Join household
+          </button>
+        </form>
+
+        {error && <p className="hc-error">{error}</p>}
+      </section>
+    </div>
   )
 }

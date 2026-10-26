@@ -10,6 +10,7 @@ interface Props {
 
 export function Settings({ store, householdId }: Props) {
   const [name, setName] = useState(store.myName ?? '')
+  const [copied, setCopied] = useState(false)
 
   const trimmed = name.trim()
   const isSaved = store.myName !== null && trimmed === store.myName
@@ -17,6 +18,12 @@ export function Settings({ store, householdId }: Props) {
   const handleSaveName = (event: FormEvent) => {
     event.preventDefault()
     if (trimmed) store.saveName(trimmed)
+  }
+
+  const copyId = async () => {
+    await navigator.clipboard.writeText(householdId)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
   }
 
   const exportBackup = () => {
@@ -31,45 +38,73 @@ export function Settings({ store, householdId }: Props) {
 
   return (
     <>
-      <form className="hc-card hc-form" style={{ marginTop: 16 }} onSubmit={handleSaveName}>
-        <h2 className="hc-card-title">Your name</h2>
-        <p className="hc-field-hint">Shown on chores and history. Your partner sees it too.</p>
-        <div className="hc-field">
-          <label className="hc-field-label" htmlFor="display-name">
-            Name
-          </label>
-          <input
-            id="display-name"
-            className="hc-input"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            maxLength={40}
-            placeholder="e.g. Abhi"
-          />
-        </div>
-        <div>
-          <button type="submit" className="hc-btn hc-btn--primary" disabled={trimmed === '' || isSaved}>
-            {isSaved ? 'Saved' : 'Save name'}
+      <header className="hc-page-head">
+        <h1 className="hc-h1">Settings</h1>
+      </header>
+
+      <h2 className="hc-section-title">Profile</h2>
+      <form className="hc-card hc-form" style={{ gap: 12, padding: 16 }} onSubmit={handleSaveName}>
+        <label className="hc-label" htmlFor="display-name">
+          Your name
+        </label>
+        <input
+          id="display-name"
+          className="hc-input"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          maxLength={40}
+          placeholder="e.g. Abhi"
+        />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <span className={`hc-status-line ${isSaved ? 'is-saved' : ''}`}>{isSaved ? 'Saved' : 'Not saved yet'}</span>
+          <button type="submit" className="hc-btn hc-btn--primary" disabled={trimmed === '' || isSaved} style={{ minHeight: 44, padding: '0 18px' }}>
+            Save
           </button>
         </div>
-        {!isSaved && trimmed !== '' && <p className={`hc-status`}>Not saved yet.</p>}
-        {isSaved && <p className="hc-status is-saved">Saved.</p>}
       </form>
 
-      <section className="hc-card hc-form" style={{ marginTop: 16 }}>
-        <h2 className="hc-card-title">Household</h2>
-        <p className="hc-field-hint">Share this ID with your partner so they can join from their own sign-in.</p>
-        <code className="hc-code">{householdId}</code>
+      <h2 className="hc-section-title">Household</h2>
+      <section className="hc-card">
+        <div className="hc-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
+          <div>
+            <p className="hc-row-label" style={{ margin: 0 }}>
+              Household ID
+            </p>
+            <p className="hc-row-sub" style={{ margin: '2px 0 0' }}>
+              Share it so your partner can join.
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--sunk)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+            <span className="hc-mono" style={{ flex: 1, minWidth: 0 }}>
+              {householdId}
+            </span>
+            <button type="button" className="hc-btn hc-btn--quiet" onClick={copyId} style={{ minHeight: 36, padding: '0 10px' }}>
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+        </div>
       </section>
 
-      <section className="hc-card hc-form" style={{ marginTop: 16 }}>
-        <h2 className="hc-card-title">Backup</h2>
-        <p className="hc-field-hint">Your data is stored in Supabase. Export a JSON copy if you want one on your own device.</p>
-        <div className="hc-form-actions">
-          <button type="button" className="hc-btn hc-btn--secondary" onClick={exportBackup}>
-            Export JSON
+      <h2 className="hc-section-title">Data</h2>
+      <section className="hc-card">
+        <div className="hc-row">
+          <div>
+            <p className="hc-row-label" style={{ margin: 0 }}>
+              Export data
+            </p>
+            <p className="hc-row-sub" style={{ margin: '2px 0 0' }}>
+              Download chores and history as JSON
+            </p>
+          </div>
+          <button type="button" className="hc-btn hc-btn--quiet" onClick={exportBackup}>
+            Export
           </button>
-          <button type="button" className="hc-btn hc-btn--secondary" onClick={() => supabase.auth.signOut()}>
+        </div>
+        <div className="hc-row">
+          <p className="hc-row-label" style={{ margin: 0 }}>
+            Sign out
+          </p>
+          <button type="button" className="hc-btn hc-btn--danger" onClick={() => supabase.auth.signOut()}>
             Sign out
           </button>
         </div>
