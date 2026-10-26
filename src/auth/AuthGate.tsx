@@ -1,0 +1,39 @@
+import { useEffect, useState } from 'react'
+import type { Session } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabase'
+import { App } from '../App'
+import { SignIn } from '../components/SignIn'
+import { HouseholdSetup } from '../components/HouseholdSetup'
+
+export function AuthGate() {
+  const [session, setSession] = useState<Session | null | undefined>(undefined)
+  const [householdId, setHouseholdId] = useState<string | null | undefined>(undefined)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next))
+    return () => data.subscription.unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    if (!session) return
+    setHouseholdId(undefined)
+    supabase
+      .from('household_members')
+      .select('household_id')
+      .eq('user_id', session.user.id)
+      .limit(1)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) console.error(error)
+        setHouseholdId(data?.household_id ?? null)
+      })
+  }, [session])
+
+  if (session === undefined) return <p className="empty">Loading…</p>
+  if (session === null) return <SignIn />
+  if (householdId === undefined) return <p className="empty">Loading…</p>
+  if (householdId === null) return <HouseholdSetup onReady={setHouseholdId} />
+
+  return <App householdId={householdId} userId={session.user.id} />
+}

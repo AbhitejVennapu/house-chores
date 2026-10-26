@@ -1,14 +1,16 @@
 import { useState } from 'react'
-import type { ChoreStore, ChoreFormValues } from '../hooks/useChoreStore'
-import type { Chore } from '../types'
+import type { ChoreStore } from '../hooks/useChoreStore'
+import type { Assignee, Chore, ChoreFormValues } from '../types'
 import { ASSIGNEE_LABELS, formatFrequency } from '../lib/labels'
 import { ChoreForm } from './ChoreForm'
 
 type Editing = Chore | 'new' | null
 
 export function ChoresManager({ store }: { store: ChoreStore }) {
-  const { data, addChore, updateChore, deleteChore } = store
+  const { data, addChore, updateChore, deleteChore, hasPartner } = store
   const [editing, setEditing] = useState<Editing>(null)
+
+  const assignees: Assignee[] = hasPartner ? ['me', 'partner', 'anyone'] : ['me', 'anyone']
 
   const handleSubmit = (values: ChoreFormValues) => {
     if (editing === 'new') addChore(values)
@@ -26,6 +28,7 @@ export function ChoresManager({ store }: { store: ChoreStore }) {
         <ChoreForm
           key={editing === 'new' ? 'new' : editing.id}
           initial={editing === 'new' ? undefined : editing}
+          assignees={assignees}
           onSubmit={handleSubmit}
           onCancel={() => setEditing(null)}
         />

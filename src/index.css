@@ -231,3 +231,13 @@ select {
   cursor: pointer;
   min-height: 40px;
 }
+
+.code {
+  display: block;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  word-break: break-all;
+  font-size: 0.9rem;
+}

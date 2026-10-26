@@ -1,6 +1,6 @@
--- Checkpoint 2 schema. Not applied yet. Run in the Supabase SQL editor after creating the project.
+-- House Chores schema. Run once in the Supabase SQL editor.
 --
--- Model: a household has members (auth users). Chores and completions belong to a household.
+-- A household has members (auth users). Chores and completions belong to a household.
 -- A chore's last-done date is derived from its completions, same as the local app.
 -- Row Level Security limits every read and write to members of that household.
 
@@ -21,9 +21,8 @@ create table chores (
   household_id uuid not null references households (id) on delete cascade,
   name text not null check (length(trim(name)) > 0),
   frequency_days integer not null check (frequency_days >= 1),
-  -- Mirrors the local Assignee type: 'me' | 'partner' | 'anyone'.
-  -- Open question for checkpoint 2: map 'me'/'partner' to member user_ids instead.
-  assignee text not null default 'anyone' check (assignee in ('me', 'partner', 'anyone')),
+  -- Null means anyone in the household can do it.
+  assignee_user_id uuid references auth.users (id) on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -78,7 +77,7 @@ end;
 $$;
 
 -- Lets a signed-in user join an existing household by its id.
--- Replace with an invite code before sharing the id with anyone outside the household.
+-- The id is a random UUID, so it works as a shared secret. Share it only with your partner.
 create function join_household(hid uuid)
 returns void
 language plpgsql
@@ -100,6 +99,18 @@ begin
 end;
 $$;
 
+-- Functions are callable by signed-in users only, not by anonymous visitors.
+revoke execute on function is_household_member(uuid) from public, anon;
+revoke execute on function create_household(text) from public, anon;
+revoke execute on function join_household(uuid) from public, anon;
+grant execute on function is_household_member(uuid) to authenticated;
+grant execute on function create_household(text) to authenticated;
+grant execute on function join_household(uuid) to authenticated;
+
+-- Table grants for the signed-in role. Needed when "Automatically expose new tables" is off.
+-- RLS policies below still decide which rows each user can see.
+grant select, insert, update, delete on households, household_members, chores, completions to authenticated;
+
 alter table households enable row level security;
 alter table household_members enable row level security;
 alter table chores enable row level security;
@@ -118,3 +129,6 @@ create policy "members manage chores" on chores
 create policy "members manage completions" on completions
   for all using (is_household_member(household_id))
   with check (is_household_member(household_id));
+
+-- Lets the app receive live changes for chores and completions.
+alter publication supabase_realtime add table chores, completions;

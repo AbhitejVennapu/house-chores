@@ -14,8 +14,13 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'settings', label: 'Settings' },
 ]
 
-export default function App() {
-  const store = useChoreStore()
+interface Props {
+  householdId: string
+  userId: string
+}
+
+export function App({ householdId, userId }: Props) {
+  const store = useChoreStore(householdId, userId)
   const [tab, setTab] = useState<Tab>('dashboard')
 
   return (
@@ -32,10 +37,17 @@ export default function App() {
       </header>
 
       <main>
-        {tab === 'dashboard' && <Dashboard store={store} />}
-        {tab === 'chores' && <ChoresManager store={store} />}
-        {tab === 'history' && <History store={store} />}
-        {tab === 'settings' && <Settings store={store} />}
+        {store.error && <p className="error">{store.error}</p>}
+        {store.loading ? (
+          <p className="empty">Loading…</p>
+        ) : (
+          <>
+            {tab === 'dashboard' && <Dashboard store={store} />}
+            {tab === 'chores' && <ChoresManager store={store} />}
+            {tab === 'history' && <History store={store} />}
+            {tab === 'settings' && <Settings store={store} householdId={householdId} />}
+          </>
+        )}
       </main>
     </div>
   )

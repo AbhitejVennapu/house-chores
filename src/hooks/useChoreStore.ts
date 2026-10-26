@@ -1,54 +1,72 @@
-import { useCallback, useEffect, useState } from 'react'
-import type { AppData, Chore, Completion } from '../types'
-import { loadData, saveData } from '../storage/localStore'
-
-export type ChoreFormValues = Omit<Chore, 'id'>
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { supabase } from '../lib/supabase'
+import * as remote from '../data/remote'
+import type { Chore, ChoreFormValues, HouseholdData } from '../types'
 
 export interface ChoreStore {
-  data: AppData
+  data: HouseholdData
+  hasPartner: boolean
+  loading: boolean
+  error: string | null
   addChore: (values: ChoreFormValues) => void
   updateChore: (chore: Chore) => void
   deleteChore: (choreId: string) => void
   markDone: (choreId: string, doneOn: string) => void
   deleteCompletion: (completionId: string) => void
-  replaceData: (data: AppData) => void
 }
 
-const newId = () => crypto.randomUUID()
+const EMPTY_DATA: HouseholdData = { chores: [], completions: [] }
 
-export function useChoreStore(): ChoreStore {
-  const [data, setData] = useState<AppData>(loadData)
+const messageOf = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
+export function useChoreStore(householdId: string, userId: string): ChoreStore {
+  const [data, setData] = useState<HouseholdData>(EMPTY_DATA)
+  const [partnerId, setPartnerId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const ctx = useMemo(() => ({ householdId, userId, partnerId }), [householdId, userId, partnerId])
+
+  const reload = useCallback(async () => {
+    try {
+      const next = await remote.fetchHousehold(householdId, userId)
+      setData(next.data)
+      setPartnerId(next.partnerId)
+      setError(null)
+    } catch (err) {
+      setError(messageOf(err))
+    } finally {
+      setLoading(false)
+    }
+  }, [householdId, userId])
+
+  // Reload whenever either table changes, including changes made from the other device.
   useEffect(() => {
-    saveData(data)
-  }, [data])
+    reload()
+    const filter = `household_id=eq.${householdId}`
+    const channel = supabase
+      .channel(`household-${householdId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chores', filter }, () => reload())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'completions', filter }, () => reload())
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [householdId, reload])
 
-  const addChore = useCallback((values: ChoreFormValues) => {
-    setData(d => ({ ...d, chores: [...d.chores, { ...values, id: newId() }] }))
-  }, [])
+  const write = (operation: () => Promise<void>) => {
+    operation().then(reload).catch(err => setError(messageOf(err)))
+  }
 
-  const updateChore = useCallback((chore: Chore) => {
-    setData(d => ({ ...d, chores: d.chores.map(c => (c.id === chore.id ? chore : c)) }))
-  }, [])
-
-  const deleteChore = useCallback((choreId: string) => {
-    setData(d => ({
-      ...d,
-      chores: d.chores.filter(c => c.id !== choreId),
-      completions: d.completions.filter(c => c.choreId !== choreId),
-    }))
-  }, [])
-
-  const markDone = useCallback((choreId: string, doneOn: string) => {
-    const completion: Completion = { id: newId(), choreId, doneOn }
-    setData(d => ({ ...d, completions: [...d.completions, completion] }))
-  }, [])
-
-  const deleteCompletion = useCallback((completionId: string) => {
-    setData(d => ({ ...d, completions: d.completions.filter(c => c.id !== completionId) }))
-  }, [])
-
-  const replaceData = useCallback((next: AppData) => setData(next), [])
-
-  return { data, addChore, updateChore, deleteChore, markDone, deleteCompletion, replaceData }
+  return {
+    data,
+    hasPartner: partnerId !== null,
+    loading,
+    error,
+    addChore: values => write(() => remote.insertChore(ctx, values)),
+    updateChore: chore => write(() => remote.updateChore(ctx, chore)),
+    deleteChore: choreId => write(() => remote.deleteChore(choreId)),
+    markDone: (choreId, doneOn) => write(() => remote.insertCompletion(ctx, choreId, doneOn)),
+    deleteCompletion: completionId => write(() => remote.deleteCompletion(completionId)),
+  }
 }
