@@ -2,7 +2,7 @@
 
 Read this before exploring the repo. For the full schema, security rules, and decisions, read `docs/architecture.md`. For setup and deployment steps, read `README.md`.
 
-For backend-learning work on the `custom-backend` branch, read `docs/learning/PROGRESS.md` first. It holds the plan, the decisions, and the current step.
+For backend-learning work on the `custom-backend` branch, read `docs/learning/PROGRESS.md` first. It holds the plan, the decisions, and the current step. After each completed step, and before a session ends, update that file: the roadmap status, the session log, and the concepts learned. Do not commit. The user commits.
 
 ## What it is
 
