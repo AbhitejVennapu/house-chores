@@ -2,6 +2,8 @@
 
 Read this before exploring the repo. For the full schema, security rules, and decisions, read `docs/architecture.md`. For setup and deployment steps, read `README.md`.
 
+For backend-learning work on the `custom-backend` branch, read `docs/learning/PROGRESS.md` first. It holds the plan, the decisions, and the current step.
+
 ## What it is
 
 A shared chore tracker for two people in one household. Each chore has a frequency in days. Marking it done sets the next due date. It's a PWA hosted on GitHub Pages, backed by Supabase.
