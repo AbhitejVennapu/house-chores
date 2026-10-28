@@ -35,8 +35,8 @@ Status: `todo`, `doing`, `done`.
 
 | # | Step | Status | Done when |
 |---|---|---|---|
-| 1 | HTTP fundamentals and a tiny server | doing | `GET /health` returns `200` and `{"ok":true}`. Other paths return `404`. |
-| 2 | Postgres in Docker, first migration, basic SQL, env vars | todo | Postgres runs in Docker. The first migration creates the chores table. The server reads the DB URL from an env var. |
+| 1 | HTTP fundamentals and a tiny server | done | `GET /health` returns `200` and `{"ok":true}`. Other paths return `404`. |
+| 2 | Postgres in Docker, first migration, basic SQL, env vars | doing | Postgres runs in Docker. The first migration creates the chores table. The server reads the DB URL from an env var. |
 | 3 | Chores endpoints, with tests (parameterized SQL) | todo | Create and list chores work. Tests cover both. |
 | 4 | Completions endpoint: transactions and idempotency | todo | Two simultaneous Done requests write one completion row. |
 | 5 | Validation, errors, logging | todo | Bad input returns `400` with one error shape. Each request is logged. |
@@ -51,12 +51,13 @@ Status: `todo`, `doing`, `done`.
 
 ## Current step
 
-Step 1. Started. Concept stage: HTTP request and response.
+Step 2. Started. Concept stage: Docker, Postgres, migrations, env vars. Docker check pending. Framework decision still open (Hono or `node:http`).
 
 ## Session log
 
 Newest first.
 
+- 2026-10-28: Completed step 1. `server/` created with TypeScript and `tsx`. `server/src/index.ts` serves `GET /health` (`200`, `{"ok":true}`) and `404` for other paths. Verified with curl. Learned about `npm run dev`, `tsconfig.json`, and the editor format-on-save setup. Started step 2 at the concept stage.
 - 2026-10-28: Reviewed the plan with the user. Revised the roadmap order and added "Done when" criteria. Started step 1 at the concept stage (HTTP request and response). Goal question still open.
 - 2026-10-28: Planned the learning. Chose TypeScript and local-only. The user created the `custom-backend` branch.
 
@@ -67,4 +68,18 @@ Newest first.
 
 ## Concepts learned
 
-None yet.
+Step 1:
+
+- HTTP request has a method, a path, and headers. HTTP response has a status code, headers, and a body.
+- Status code groups: `2xx` success, `4xx` client error, `5xx` server error.
+- `http.createServer` runs its callback once per request. `req.url` holds the path and query string.
+- `curl -i` shows the status code and headers.
+- `npm run dev` runs a script from `package.json`. `tsx watch` restarts on save.
+- `tsconfig.json`: `types` loads Node type definitions. `include` picks the files to check.
+- `req.url.split("?")[0]` gives the path without the query string. Use `===` for an exact match. `includes` matches too much.
+
+Step 2 (planned):
+
+- Docker runs a program in a container. Postgres runs in a container, so it need not be installed on the Mac.
+- A migration is a numbered SQL file. The database records which files ran.
+- Env vars keep settings such as `DATABASE_URL` out of the code.
