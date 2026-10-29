@@ -6,7 +6,7 @@ Stack: React + Vite + TypeScript, Supabase (auth, Postgres, realtime), hosted on
 
 ## Features
 
-- Email magic-link sign-in. Create a household, or join one with its ID.
+- Email and password sign-in, with a magic link for first sign-in and recovery. Create a household, or join one with its ID.
 - Chores with a frequency in days or weeks, assigned to Me, Partner, or Anyone.
 - Today screen: overdue, due today, and upcoming, with a Done button and an Undo toast.
 - History grouped by day, with Undo.
@@ -29,7 +29,8 @@ In `.env`, set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from Supabase �
 1. **Fresh project:** run `supabase/schema.sql` once in the SQL editor. It includes display names.
 2. **Existing project from before display names:** run only `supabase/migrations/002_profiles.sql`.
 3. **Authentication → URL Configuration:** set the Site URL to `https://abhitejvennapu.github.io/house-chores/`. Add it and `http://localhost:5173/` to the redirect URLs.
-4. **Email limits:** Supabase's built-in sender allows about 2 sign-in emails an hour. For more, set up custom SMTP under Authentication → Emails.
+4. **Password length:** under Authentication → Providers → Email, set the minimum password length to 8 or more.
+5. **Email limits:** Supabase's built-in sender allows about 2 sign-in emails an hour. For more, set up custom SMTP under Authentication → Emails.
 
 ## Deployment
 

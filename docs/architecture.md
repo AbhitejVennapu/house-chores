@@ -7,7 +7,7 @@ Reference for how House Chores works. `CLAUDE.md` is the short version. Keep thi
 ```
 Browser (PWA)                          Supabase
 ┌──────────────────────────────┐       ┌───────────────────────────┐
-│ AuthGate                     │ auth  │ Auth (email magic link)   │
+│ AuthGate                     │ auth  │ Auth (email + password)   │
 │   ├─ SignIn                  │◄─────►│                           │
 │   ├─ HouseholdSetup          │ rpc   │ Postgres                  │
 │   └─ App                     │◄─────►│   tables + RLS + functions│
@@ -25,7 +25,8 @@ The app has no backend of its own. The browser talks to Supabase directly. Acces
 ## Auth and household flow
 
 1. `AuthGate` reads the session. There's no session, so it shows `SignIn`.
-2. `SignIn` sends a magic link with `signInWithOtp`. The link redirects to the app's base URL.
+2. `SignIn` signs in with email and password (`signInWithPassword`). The fallback is a magic link (`signInWithOtp`) that redirects to the app's base URL, used for first sign-in and forgotten passwords.
+   - After a session exists, `AuthGate` shows `SetPassword` until `user_metadata.has_password` is true. "Not now" is remembered per user in `localStorage`. Settings has the same `PasswordForm` for changing it later.
 3. With a session, `AuthGate` looks up the user's row in `household_members`.
 4. No row: `HouseholdSetup`.
    - Create: `create_household()` creates a household and adds the caller as its first member.
@@ -81,7 +82,7 @@ The Vite `base` is `/house-chores/` in CI and `/` locally. The PWA manifest uses
 ## Decisions
 
 - **Supabase over Firebase.** Postgres and SQL suit relational data. RLS keeps authorization in the database, and the client needs no server.
-- **Magic links, not passwords.** Two people, one device each, and no password to manage. The trade-off is the email rate limit (about 2 an hour on the built-in sender).
+- **Password sign-in, magic link as fallback.** A magic link opens in the system browser, not the installed PWA, so the PWA stays signed out. A password set once works on every device. Supabase hashes it (bcrypt in `auth.users`). Magic links remain for first sign-in and recovery, so the email rate limit (about 2 an hour on the built-in sender) rarely bites.
 - **Household UUID as the join secret.** Simple to share between two people. A stronger model (invite codes with expiry) would be needed if the app ever had more users.
 - **Assignee stored as a user ID.** "Me" and "Partner" mean different people on each device, so the database stores who is meant.
 - **Due dates derived, not stored.** Changing a frequency immediately changes every due date, and there's no stored state to fall out of sync.

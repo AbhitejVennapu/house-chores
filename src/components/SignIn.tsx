@@ -4,12 +4,27 @@ import { BrandIcon } from './icons'
 
 export function SignIn() {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [useLink, setUseLink] = useState(false)
   const [sent, setSent] = useState(false)
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const switchMode = () => {
+    setUseLink(prev => !prev)
+    setError(null)
+  }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     setError(null)
+    if (!useLink) {
+      setBusy(true)
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+      setBusy(false)
+      if (error) setError(error.message)
+      return
+    }
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: { emailRedirectTo: window.location.origin + import.meta.env.BASE_URL },
@@ -26,7 +41,7 @@ export function SignIn() {
         </div>
         <div>
           <h1 className="hc-h1">Sign in</h1>
-          <p className="hc-lede">We'll email you a link. No password needed.</p>
+          <p className="hc-lede">{useLink ? "We'll email you a link." : 'Use your email and password.'}</p>
         </div>
       </div>
 
@@ -54,17 +69,38 @@ export function SignIn() {
               />
               <p className="hc-hint">Use the address your partner signs in with too.</p>
             </div>
+            {!useLink && (
+              <div className="hc-field">
+                <label className="hc-label" htmlFor="password">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  className="hc-input"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
+              </div>
+            )}
             {error && <p className="hc-error">{error}</p>}
-            <button type="submit" className="hc-btn hc-btn--primary hc-btn--block">
-              Send sign-in link
+            <button type="submit" className="hc-btn hc-btn--primary hc-btn--block" disabled={busy}>
+              {useLink ? 'Send sign-in link' : 'Sign in'}
+            </button>
+            <button type="button" className="hc-btn hc-btn--quiet hc-btn--block" onClick={switchMode}>
+              {useLink ? 'Use a password instead' : 'First time or forgot password? Email me a link'}
             </button>
           </div>
         </form>
       )}
 
-      <p className="hc-status-line" style={{ margin: '20px 0 0', textAlign: 'center' }}>
-        Opening the link on this device signs you in.
-      </p>
+      {useLink && (
+        <p className="hc-status-line" style={{ margin: '20px 0 0', textAlign: 'center' }}>
+          Opening the link signs you in in that browser. Set a password afterwards to use the home-screen app.
+        </p>
+      )}
     </div>
   )
 }

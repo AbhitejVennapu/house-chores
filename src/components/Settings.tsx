@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import type { ChoreStore } from '../hooks/useChoreStore'
 import { supabase } from '../lib/supabase'
 import { todayISO } from '../lib/dates'
+import { PasswordForm } from './SetPassword'
 
 interface Props {
   store: ChoreStore
@@ -11,6 +12,7 @@ interface Props {
 export function Settings({ store, householdId }: Props) {
   const [name, setName] = useState(store.myName ?? '')
   const [copied, setCopied] = useState(false)
+  const [passwordSaved, setPasswordSaved] = useState(false)
 
   const trimmed = name.trim()
   const isSaved = store.myName !== null && trimmed === store.myName
@@ -62,6 +64,12 @@ export function Settings({ store, householdId }: Props) {
           </button>
         </div>
       </form>
+
+      <h2 className="hc-section-title">Password</h2>
+      <section className="hc-card" style={{ padding: 16 }}>
+        {passwordSaved && <p className="hc-status-line is-saved">Password saved</p>}
+        <PasswordForm submitLabel="Save password" onDone={() => setPasswordSaved(true)} />
+      </section>
 
       <h2 className="hc-section-title">Household</h2>
       <section className="hc-card">
