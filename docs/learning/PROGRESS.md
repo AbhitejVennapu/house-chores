@@ -19,15 +19,15 @@ Build our own backend and Postgres database as an alternative to Supabase. The a
 
 ## Decisions
 
-| Decision             | Choice                                                                                                                    | Reason                                                                              | Date       |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------- |
-| Server language      | TypeScript (Node)                                                                                                         | Already known. Types can be shared with the client.                                 | 2026-10-28 |
-| Database             | Postgres                                                                                                                  | Same engine as Supabase. `supabase/schema.sql` is a starting point.                 | 2026-10-28 |
-| Data access          | Plain SQL first, ORM or query builder later                                                                               | See what an ORM hides.                                                              | 2026-10-28 |
-| Hosting              | Local only (Docker Compose)                                                                                               | Learn the core first. Deploy later.                                                 | 2026-10-28 |
-| Frontend integration | `DataSource` interface over `src/data/remote.ts`, chosen by env var                                                       | Keeps Supabase working.                                                             | 2026-10-28 |
-| Web framework        | Undecided                                                                                                                 | Hono or Fastify. Decide at step 1.                                                  |            |
-| Step order           | Migrations in step 2. Tests start in step 3. Auth and households split into steps 7 and 8. Transactions taught in step 4. | Plan review. Migrations and tests were too late. Auth and households were one step. | 2026-10-28 |
+| Decision             | Choice                                                                                                                    | Reason                                                                                                         | Date       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------- |
+| Server language      | TypeScript (Node)                                                                                                         | Already known. Types can be shared with the client.                                                            | 2026-10-28 |
+| Database             | Postgres                                                                                                                  | Same engine as Supabase. `supabase/schema.sql` is a starting point.                                            | 2026-10-28 |
+| Data access          | Plain SQL first, ORM or query builder later                                                                               | See what an ORM hides.                                                                                         | 2026-10-28 |
+| Hosting              | Local only (Docker Compose)                                                                                               | Learn the core first. Deploy later.                                                                            | 2026-10-28 |
+| Frontend integration | `DataSource` interface over `src/data/remote.ts`, chosen by env var                                                       | Keeps Supabase working.                                                                                        | 2026-10-28 |
+| Web framework        | Express 5                                                                                                                 | Biggest ecosystem and most tutorials. Thin layer over `node:http`. Hono and Fastify were the other candidates. | 2026-10-29 |
+| Step order           | Migrations in step 2. Tests start in step 3. Auth and households split into steps 7 and 8. Transactions taught in step 4. | Plan review. Migrations and tests were too late. Auth and households were one step.                            | 2026-10-28 |
 
 ## Roadmap
 
@@ -51,19 +51,19 @@ Status: `todo`, `doing`, `done`.
 
 ## Current step
 
-Step 2. Started. Concept stage: Docker, Postgres, migrations, env vars. Docker check pending. Framework decision still open (Hono or `node:http`).
+Step 2. Started. Concept stage: Docker, Postgres, migrations, env vars. Docker check pending. The server now runs on Express, with `/health` and a JSON 404 fallback. Next: move the hardcoded port `3000` into an env var, then Docker and Postgres.
 
 ## Session log
 
 Newest first.
 
+- 2026-10-29: Chose Express 5 as the web framework. Installed `express` and `@types/express` in `server/`. The user ported `GET /health` to `app.get` and wrote the JSON 404 fallback with `app.use`. Verified with `curl -i`. Also set up Prettier (root `.prettierrc`, `format` and `format:check` scripts, VS Code format on save), and learned the difference between oxlint (linter) and Prettier (formatter). Step 2 still in the concept stage.
 - 2026-10-28: Completed step 1. `server/` created with TypeScript and `tsx`. `server/src/index.ts` serves `GET /health` (`200`, `{"ok":true}`) and `404` for other paths. Verified with curl. Learned about `npm run dev`, `tsconfig.json`, and the editor format-on-save setup. Started step 2 at the concept stage.
 - 2026-10-28: Reviewed the plan with the user. Revised the roadmap order and added "Done when" criteria. Started step 1 at the concept stage (HTTP request and response). Goal question still open.
 - 2026-10-28: Planned the learning. Chose TypeScript and local-only. The user created the `custom-backend` branch.
 
 ## Open questions
 
-- Web framework: Hono or Fastify?
 - Goal: learn concepts well enough to explain them, or build something production-ready? This sets the depth of steps 9, 11, and 13.
 
 ## Concepts learned
@@ -77,6 +77,16 @@ Step 1:
 - `npm run dev` runs a script from `package.json`. `tsx watch` restarts on save.
 - `tsconfig.json`: `types` loads Node type definitions. `include` picks the files to check.
 - `req.url.split("?")[0]` gives the path without the query string. Use `===` for an exact match. `includes` matches too much.
+
+Express setup (between steps 1 and 2):
+
+- `npm install express` goes in `dependencies` (needed at runtime). `npm install -D @types/express` goes in `devDependencies` (types only). Run npm commands inside `server/`, which has its own `package.json`.
+- `app.get(path, handler)` answers one method and one path. `app.use(handler)` with no path runs for every request that reaches it. `app.listen(port, callback)` starts the server.
+- Express runs handlers in the order they are registered. The first one that sends a response ends the chain, so the 404 `app.use` goes last. Moving it above `/health` breaks `/health`.
+- `next()` passes a request to the next handler. A handler that neither responds nor calls `next()` makes the request hang.
+- `res.status(200).json({...})` sets the status, sets `Content-Type`, and sends JSON. Express also adds `ETag`, `Content-Length`, and `X-Powered-By` headers.
+- A linter (oxlint) finds likely bugs. A formatter (Prettier) fixes layout. Root `npm run lint` already scans `server/`.
+- npm scripts run tools from `node_modules/.bin`, so `prettier` works in a script without `npx`.
 
 Step 2 (planned):
 
