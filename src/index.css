@@ -2,12 +2,12 @@
    Drop-in for src/index.css. Tokens on :root; dark mode via prefers-color-scheme
    and the data-theme attribute. Class names are the ones the screens use. */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* ---------- Colour: light ---------- */
 
 :root,
-[data-theme="light"] {
+[data-theme='light'] {
   --bg: #f6f5f1;
   --surface: #ffffff;
   --sunk: #efeee8;
@@ -36,7 +36,7 @@
 /* ---------- Colour: dark ---------- */
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme='light']) {
     --bg: #0f1412;
     --surface: #161d1a;
     --sunk: #1d2622;
@@ -63,7 +63,7 @@
   }
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --bg: #0f1412;
   --surface: #161d1a;
   --sunk: #1d2622;
@@ -92,7 +92,7 @@
 /* ---------- Scale (theme-independent) ---------- */
 
 :root {
-  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --text-xs: 12px;
@@ -214,13 +214,13 @@ svg {
   white-space: nowrap;
 }
 
-.hc-filter button[aria-pressed="true"] {
+.hc-filter button[aria-pressed='true'] {
   color: var(--ink);
   font-weight: 600;
 }
 
-.hc-filter button[aria-pressed="true"]::after {
-  content: "";
+.hc-filter button[aria-pressed='true']::after {
+  content: '';
   position: absolute;
   left: 12px;
   right: 12px;
@@ -307,7 +307,7 @@ svg {
 }
 
 .hc-status::before {
-  content: "";
+  content: '';
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -349,7 +349,9 @@ svg {
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
+  transition:
+    background-color 0.15s var(--ease),
+    border-color 0.15s var(--ease);
 }
 
 .hc-btn--block {
@@ -514,7 +516,7 @@ svg {
   font-weight: 500;
 }
 
-.hc-choice[aria-checked="true"] {
+.hc-choice[aria-checked='true'] {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent-ink);
@@ -619,12 +621,12 @@ svg {
   transition: background-color 0.2s var(--ease);
 }
 
-.hc-tabbar-item[aria-current="page"] {
+.hc-tabbar-item[aria-current='page'] {
   color: var(--ink);
   font-weight: 600;
 }
 
-.hc-tabbar-item[aria-current="page"] .hc-tabbar-icon {
+.hc-tabbar-item[aria-current='page'] .hc-tabbar-icon {
   background: var(--accent-soft);
   color: var(--accent-ink);
 }
@@ -714,8 +716,12 @@ svg {
 }
 
 @keyframes hc-shimmer {
-  from { background-position: 200% 0; }
-  to { background-position: -200% 0; }
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
 }
 
 .hc-brand {

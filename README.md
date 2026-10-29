@@ -40,12 +40,12 @@ Pushing to `main` runs `.github/workflows/deploy.yml`, which tests, builds, and 
 
 ## Scripts
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | Local dev server |
-| `npm test` | Unit tests for date and due-date logic |
+| Command         | What it does                               |
+| --------------- | ------------------------------------------ |
+| `npm run dev`   | Local dev server                           |
+| `npm test`      | Unit tests for date and due-date logic     |
 | `npm run build` | Type-check and production build to `dist/` |
-| `npm run lint` | Lint with oxlint |
+| `npm run lint`  | Lint with oxlint                           |
 
 ## Project layout
 
@@ -62,6 +62,7 @@ Pushing to `main` runs `.github/workflows/deploy.yml`, which tests, builds, and 
 Working: sign-in, household create and join, chores, completions, live sync, display names, the Undo toast, and home-screen icons.
 
 Known limits:
+
 - No offline mode. The app needs a connection.
 - JSON import was removed. Data lives in Supabase.
 - The built-in email sender allows about 2 sign-in emails an hour.

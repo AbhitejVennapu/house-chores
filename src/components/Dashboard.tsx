@@ -18,15 +18,21 @@ export function Dashboard({ store }: { store: ChoreStore }) {
   const summaries = useMemo(
     () =>
       data.chores
-        .filter(chore => filter === 'all' || chore.assignee === filter)
-        .map(chore => summarizeChore(chore, data.completions, today))
-        .sort((a, b) => a.daysUntilDue - b.daysUntilDue || a.chore.name.localeCompare(b.chore.name)),
+        .filter((chore) => filter === 'all' || chore.assignee === filter)
+        .map((chore) => summarizeChore(chore, data.completions, today))
+        .sort(
+          (a, b) => a.daysUntilDue - b.daysUntilDue || a.chore.name.localeCompare(b.chore.name),
+        ),
     [data, today, filter],
   )
 
-  const overdueCount = summaries.filter(s => s.status === 'overdue').length
-  const todayCount = summaries.filter(s => s.status === 'today').length
-  const weekday = parseISODate(today).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
+  const overdueCount = summaries.filter((s) => s.status === 'overdue').length
+  const todayCount = summaries.filter((s) => s.status === 'today').length
+  const weekday = parseISODate(today).toLocaleDateString(undefined, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
 
   if (data.chores.length === 0) {
     return (
@@ -47,20 +53,43 @@ export function Dashboard({ store }: { store: ChoreStore }) {
 
   return (
     <>
-      <PageHead kicker={weekday} title="Today" lede={`${overdueCount} overdue · ${todayCount} due today`} />
+      <PageHead
+        kicker={weekday}
+        title="Today"
+        lede={`${overdueCount} overdue · ${todayCount} due today`}
+      />
 
       <div className="hc-filter" role="group" aria-label="Filter by person">
-        {FILTERS.map(f => (
+        {FILTERS.map((f) => (
           <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)}>
             {f === 'all' ? 'All' : labels[f]}
           </button>
         ))}
       </div>
 
-      {summaries.length === 0 && <p className="hc-status-line" style={{ marginTop: 24 }}>Nothing assigned here.</p>}
-      <Group title="Overdue" items={summaries.filter(s => s.status === 'overdue')} labels={labels} onDone={onDone} />
-      <Group title="Due today" items={summaries.filter(s => s.status === 'today')} labels={labels} onDone={onDone} />
-      <Group title="Upcoming" items={summaries.filter(s => s.status === 'upcoming')} labels={labels} onDone={onDone} />
+      {summaries.length === 0 && (
+        <p className="hc-status-line" style={{ marginTop: 24 }}>
+          Nothing assigned here.
+        </p>
+      )}
+      <Group
+        title="Overdue"
+        items={summaries.filter((s) => s.status === 'overdue')}
+        labels={labels}
+        onDone={onDone}
+      />
+      <Group
+        title="Due today"
+        items={summaries.filter((s) => s.status === 'today')}
+        labels={labels}
+        onDone={onDone}
+      />
+      <Group
+        title="Upcoming"
+        items={summaries.filter((s) => s.status === 'upcoming')}
+        labels={labels}
+        onDone={onDone}
+      />
     </>
   )
 }
@@ -94,7 +123,7 @@ function Group({ title, items, labels, onDone }: GroupProps) {
         <span className="hc-group-count">{items.length}</span>
       </div>
       <div className="hc-card">
-        {items.map(summary => (
+        {items.map((summary) => (
           <div key={summary.chore.id} className="hc-item">
             <div className="hc-item-main">
               <p className="hc-item-name">{summary.chore.name}</p>

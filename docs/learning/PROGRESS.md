@@ -19,35 +19,35 @@ Build our own backend and Postgres database as an alternative to Supabase. The a
 
 ## Decisions
 
-| Decision | Choice | Reason | Date |
-|---|---|---|---|
-| Server language | TypeScript (Node) | Already known. Types can be shared with the client. | 2026-10-28 |
-| Database | Postgres | Same engine as Supabase. `supabase/schema.sql` is a starting point. | 2026-10-28 |
-| Data access | Plain SQL first, ORM or query builder later | See what an ORM hides. | 2026-10-28 |
-| Hosting | Local only (Docker Compose) | Learn the core first. Deploy later. | 2026-10-28 |
-| Frontend integration | `DataSource` interface over `src/data/remote.ts`, chosen by env var | Keeps Supabase working. | 2026-10-28 |
-| Web framework | Undecided | Hono or Fastify. Decide at step 1. | |
-| Step order | Migrations in step 2. Tests start in step 3. Auth and households split into steps 7 and 8. Transactions taught in step 4. | Plan review. Migrations and tests were too late. Auth and households were one step. | 2026-10-28 |
+| Decision             | Choice                                                                                                                    | Reason                                                                              | Date       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------- |
+| Server language      | TypeScript (Node)                                                                                                         | Already known. Types can be shared with the client.                                 | 2026-10-28 |
+| Database             | Postgres                                                                                                                  | Same engine as Supabase. `supabase/schema.sql` is a starting point.                 | 2026-10-28 |
+| Data access          | Plain SQL first, ORM or query builder later                                                                               | See what an ORM hides.                                                              | 2026-10-28 |
+| Hosting              | Local only (Docker Compose)                                                                                               | Learn the core first. Deploy later.                                                 | 2026-10-28 |
+| Frontend integration | `DataSource` interface over `src/data/remote.ts`, chosen by env var                                                       | Keeps Supabase working.                                                             | 2026-10-28 |
+| Web framework        | Undecided                                                                                                                 | Hono or Fastify. Decide at step 1.                                                  |            |
+| Step order           | Migrations in step 2. Tests start in step 3. Auth and households split into steps 7 and 8. Transactions taught in step 4. | Plan review. Migrations and tests were too late. Auth and households were one step. | 2026-10-28 |
 
 ## Roadmap
 
 Status: `todo`, `doing`, `done`.
 
-| # | Step | Status | Done when |
-|---|---|---|---|
-| 1 | HTTP fundamentals and a tiny server | done | `GET /health` returns `200` and `{"ok":true}`. Other paths return `404`. |
-| 2 | Postgres in Docker, first migration, basic SQL, env vars | doing | Postgres runs in Docker. The first migration creates the chores table. The server reads the DB URL from an env var. |
-| 3 | Chores endpoints, with tests (parameterized SQL) | todo | Create and list chores work. Tests cover both. |
-| 4 | Completions endpoint: transactions and idempotency | todo | Two simultaneous Done requests write one completion row. |
-| 5 | Validation, errors, logging | todo | Bad input returns `400` with one error shape. Each request is logged. |
-| 6 | Indexes and query plans (`EXPLAIN`) | todo | A query plan shows an index scan for the chore list. |
-| 7 | Auth: users, password hashing, sessions | todo | A user signs up, logs in, and calls a protected route. |
-| 8 | Households: authorization (replaces RLS) | todo | A user sees only their household's chores. |
-| 9 | CI on pull requests | todo | A pull request runs the tests in CI and shows pass or fail. |
-| 10 | Realtime (SSE) | todo | A second client gets a chore change without reloading. |
-| 11 | Deploy: HTTPS, reverse proxy, secrets | todo | The API runs on a public HTTPS URL. |
-| 12 | Frontend switch via `DataSource` | todo | The app works on Supabase and on this backend. An env var picks one. |
-| 13 | Load balancer experiment (optional) | todo | Two server instances run behind a load balancer. Requests reach both. |
+| #   | Step                                                     | Status | Done when                                                                                                           |
+| --- | -------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
+| 1   | HTTP fundamentals and a tiny server                      | done   | `GET /health` returns `200` and `{"ok":true}`. Other paths return `404`.                                            |
+| 2   | Postgres in Docker, first migration, basic SQL, env vars | doing  | Postgres runs in Docker. The first migration creates the chores table. The server reads the DB URL from an env var. |
+| 3   | Chores endpoints, with tests (parameterized SQL)         | todo   | Create and list chores work. Tests cover both.                                                                      |
+| 4   | Completions endpoint: transactions and idempotency       | todo   | Two simultaneous Done requests write one completion row.                                                            |
+| 5   | Validation, errors, logging                              | todo   | Bad input returns `400` with one error shape. Each request is logged.                                               |
+| 6   | Indexes and query plans (`EXPLAIN`)                      | todo   | A query plan shows an index scan for the chore list.                                                                |
+| 7   | Auth: users, password hashing, sessions                  | todo   | A user signs up, logs in, and calls a protected route.                                                              |
+| 8   | Households: authorization (replaces RLS)                 | todo   | A user sees only their household's chores.                                                                          |
+| 9   | CI on pull requests                                      | todo   | A pull request runs the tests in CI and shows pass or fail.                                                         |
+| 10  | Realtime (SSE)                                           | todo   | A second client gets a chore change without reloading.                                                              |
+| 11  | Deploy: HTTPS, reverse proxy, secrets                    | todo   | The API runs on a public HTTPS URL.                                                                                 |
+| 12  | Frontend switch via `DataSource`                         | todo   | The app works on Supabase and on this backend. An env var picks one.                                                |
+| 13  | Load balancer experiment (optional)                      | todo   | Two server instances run behind a load balancer. Requests reach both.                                               |
 
 ## Current step
 

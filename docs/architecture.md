@@ -34,15 +34,16 @@ The app has no backend of its own. The browser talks to Supabase directly. Acces
 
 ## Data model
 
-| Table | Key columns | Notes |
-|---|---|---|
-| `households` | `id`, `name` | Created only by `create_household()` |
-| `household_members` | `household_id`, `user_id` | Primary key is the pair. Lets one user belong to one household in practice |
-| `chores` | `id`, `household_id`, `name`, `frequency_days`, `assignee_user_id` | `assignee_user_id` null means "Anyone" |
-| `completions` | `id`, `household_id`, `chore_id`, `done_on` (date), `done_by` | One row per time a chore was done |
-| `profiles` | `user_id`, `display_name` | Readable by members of a shared household |
+| Table               | Key columns                                                        | Notes                                                                      |
+| ------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `households`        | `id`, `name`                                                       | Created only by `create_household()`                                       |
+| `household_members` | `household_id`, `user_id`                                          | Primary key is the pair. Lets one user belong to one household in practice |
+| `chores`            | `id`, `household_id`, `name`, `frequency_days`, `assignee_user_id` | `assignee_user_id` null means "Anyone"                                     |
+| `completions`       | `id`, `household_id`, `chore_id`, `done_on` (date), `done_by`      | One row per time a chore was done                                          |
+| `profiles`          | `user_id`, `display_name`                                          | Readable by members of a shared household                                  |
 
 Derived values are never stored:
+
 - A chore's last-done date is the latest `done_on` among its completions.
 - Due date = last-done date + `frequency_days`. A never-done chore is due today.
 - Status: overdue if the due date is before today, due today if equal, otherwise upcoming.

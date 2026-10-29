@@ -64,8 +64,12 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
     const filter = `household_id=eq.${householdId}`
     const channel = supabase
       .channel(`household-${householdId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'chores', filter }, () => reload())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'completions', filter }, () => reload())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chores', filter }, () =>
+        reload(),
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'completions', filter }, () =>
+        reload(),
+      )
       .subscribe()
     return () => {
       supabase.removeChannel(channel)
@@ -80,7 +84,9 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
   }, [toast])
 
   const write = (operation: () => Promise<void>) => {
-    operation().then(reload).catch(err => setError(messageOf(err)))
+    operation()
+      .then(reload)
+      .catch((err) => setError(messageOf(err)))
   }
 
   const labels: Record<Assignee, string> = {
@@ -90,14 +96,14 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
   }
 
   const markDone = (choreId: string, doneOn: string) => {
-    const choreName = data.chores.find(c => c.id === choreId)?.name ?? 'Chore'
+    const choreName = data.chores.find((c) => c.id === choreId)?.name ?? 'Chore'
     remote
       .insertCompletion(ctx, choreId, doneOn)
-      .then(completionId => {
+      .then((completionId) => {
         setToast({ completionId, choreName })
         return reload()
       })
-      .catch(err => setError(messageOf(err)))
+      .catch((err) => setError(messageOf(err)))
   }
 
   const undoToast = () => {
@@ -115,13 +121,13 @@ export function useChoreStore(householdId: string, userId: string): ChoreStore {
     loading,
     error,
     toast,
-    addChore: values => write(() => remote.insertChore(ctx, values)),
-    updateChore: chore => write(() => remote.updateChore(ctx, chore)),
-    deleteChore: choreId => write(() => remote.deleteChore(choreId)),
+    addChore: (values) => write(() => remote.insertChore(ctx, values)),
+    updateChore: (chore) => write(() => remote.updateChore(ctx, chore)),
+    deleteChore: (choreId) => write(() => remote.deleteChore(choreId)),
     markDone,
     undoToast,
     dismissToast: () => setToast(null),
-    deleteCompletion: completionId => write(() => remote.deleteCompletion(completionId)),
-    saveName: displayName => write(() => remote.saveDisplayName(userId, displayName)),
+    deleteCompletion: (completionId) => write(() => remote.deleteCompletion(completionId)),
+    saveName: (displayName) => write(() => remote.saveDisplayName(userId, displayName)),
   }
 }

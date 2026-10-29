@@ -12,7 +12,8 @@ interface Props {
 }
 
 export function ChoreForm({ initial, assignees, labels, onSubmit, onCancel }: Props) {
-  const initialIsWeeks = initial !== undefined && initial.frequencyDays >= 7 && initial.frequencyDays % 7 === 0
+  const initialIsWeeks =
+    initial !== undefined && initial.frequencyDays >= 7 && initial.frequencyDays % 7 === 0
 
   const [name, setName] = useState(initial?.name ?? '')
   const [amount, setAmount] = useState(
@@ -56,7 +57,7 @@ export function ChoreForm({ initial, assignees, labels, onSubmit, onCancel }: Pr
             id="chore-name"
             className="hc-input"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             placeholder="Laundry"
             autoFocus
           />
@@ -75,11 +76,11 @@ export function ChoreForm({ initial, assignees, labels, onSubmit, onCancel }: Pr
               min={1}
               inputMode="numeric"
               value={amount}
-              onChange={e => setAmount(e.target.value)}
+              onChange={(e) => setAmount(e.target.value)}
               style={{ textAlign: 'center' }}
             />
             <div className="hc-choices" role="radiogroup" aria-label="Unit">
-              {(['days', 'weeks'] as Unit[]).map(u => (
+              {(['days', 'weeks'] as Unit[]).map((u) => (
                 <button
                   key={u}
                   type="button"
@@ -100,7 +101,7 @@ export function ChoreForm({ initial, assignees, labels, onSubmit, onCancel }: Pr
             Assigned to
           </span>
           <div className="hc-choices" role="radiogroup" aria-labelledby="assigned-to">
-            {assignees.map(key => (
+            {assignees.map((key) => (
               <button
                 key={key}
                 type="button"

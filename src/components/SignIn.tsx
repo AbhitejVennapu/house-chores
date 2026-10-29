@@ -19,7 +19,16 @@ export function SignIn() {
   }
 
   return (
-    <div className="hc-screen" style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingBottom: 40 }}>
+    <div
+      className="hc-screen"
+      style={{
+        minHeight: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        paddingBottom: 40,
+      }}
+    >
       <div style={{ display: 'grid', gap: 14, justifyItems: 'start', marginBottom: 32 }}>
         <div className="hc-brand">
           <BrandIcon />
@@ -49,7 +58,7 @@ export function SignIn() {
                 required
                 placeholder="you@example.com"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
               />
               <p className="hc-hint">Use the address your partner signs in with too.</p>

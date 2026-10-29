@@ -53,7 +53,7 @@ export function App({ householdId, userId }: Props) {
       )}
 
       <nav className="hc-tabbar" aria-label="Sections">
-        {TABS.map(t => {
+        {TABS.map((t) => {
           const Icon = t.icon
           return (
             <button

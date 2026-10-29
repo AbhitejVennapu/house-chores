@@ -39,12 +39,19 @@ export function HouseholdSetup({ onReady }: Props) {
         </div>
         <div>
           <h1 className="hc-h1">Set up your household</h1>
-          <p className="hc-lede">Create one if you're first. If your partner already did, paste their ID to join.</p>
+          <p className="hc-lede">
+            Create one if you're first. If your partner already did, paste their ID to join.
+          </p>
         </div>
       </div>
 
       <section className="hc-card hc-form">
-        <button type="button" className="hc-btn hc-btn--primary hc-btn--block" onClick={handleCreate} disabled={busy}>
+        <button
+          type="button"
+          className="hc-btn hc-btn--primary hc-btn--block"
+          onClick={handleCreate}
+          disabled={busy}
+        >
           Create household
         </button>
 
@@ -57,11 +64,15 @@ export function HouseholdSetup({ onReady }: Props) {
               id="household-id"
               className="hc-input"
               value={joinId}
-              onChange={e => setJoinId(e.target.value)}
+              onChange={(e) => setJoinId(e.target.value)}
               placeholder="xxxxxxxx-xxxx-…"
             />
           </div>
-          <button type="submit" className="hc-btn hc-btn--outline hc-btn--block" disabled={busy || joinId.trim() === ''}>
+          <button
+            type="submit"
+            className="hc-btn hc-btn--outline hc-btn--block"
+            disabled={busy || joinId.trim() === ''}
+          >
             Join household
           </button>
         </form>

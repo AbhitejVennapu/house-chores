@@ -4,8 +4,8 @@ import { CheckIcon } from './icons'
 
 export function History({ store }: { store: ChoreStore }) {
   const { data, deleteCompletion, labels } = store
-  const names = new Map(data.chores.map(chore => [chore.id, chore.name]))
-  const assignees = new Map(data.chores.map(chore => [chore.id, chore.assignee]))
+  const names = new Map(data.chores.map((chore) => [chore.id, chore.name]))
+  const assignees = new Map(data.chores.map((chore) => [chore.id, chore.assignee]))
   const rows = [...data.completions].sort((a, b) => b.doneOn.localeCompare(a.doneOn))
 
   const byDay = new Map<string, typeof rows>()
@@ -19,7 +19,9 @@ export function History({ store }: { store: ChoreStore }) {
         <p className="hc-kicker">Recent</p>
         <h1 className="hc-h1">History</h1>
         <p className="hc-lede">
-          {rows.length === 0 ? 'Nothing completed yet' : `${rows.length} ${rows.length === 1 ? 'chore' : 'chores'} completed`}
+          {rows.length === 0
+            ? 'Nothing completed yet'
+            : `${rows.length} ${rows.length === 1 ? 'chore' : 'chores'} completed`}
         </p>
       </header>
 
@@ -42,7 +44,7 @@ export function History({ store }: { store: ChoreStore }) {
             <span className="hc-group-count">{dayRows.length}</span>
           </div>
           <div className="hc-card">
-            {dayRows.map(row => {
+            {dayRows.map((row) => {
               const assignee = assignees.get(row.choreId)
               return (
                 <div key={row.id} className="hc-item">
@@ -50,7 +52,11 @@ export function History({ store }: { store: ChoreStore }) {
                     <p className="hc-item-name">{names.get(row.choreId) ?? 'Deleted chore'}</p>
                     {assignee && <span className="hc-item-meta">{labels[assignee]}</span>}
                   </div>
-                  <button type="button" className="hc-btn hc-btn--quiet" onClick={() => deleteCompletion(row.id)}>
+                  <button
+                    type="button"
+                    className="hc-btn hc-btn--quiet"
+                    onClick={() => deleteCompletion(row.id)}
+                  >
                     Undo
                   </button>
                 </div>

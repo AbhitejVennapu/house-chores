@@ -51,13 +51,27 @@ export function Settings({ store, householdId }: Props) {
           id="display-name"
           className="hc-input"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
           maxLength={40}
           placeholder="e.g. Abhi"
         />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <span className={`hc-status-line ${isSaved ? 'is-saved' : ''}`}>{isSaved ? 'Saved' : 'Not saved yet'}</span>
-          <button type="submit" className="hc-btn hc-btn--primary" disabled={trimmed === '' || isSaved} style={{ minHeight: 44, padding: '0 18px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+          }}
+        >
+          <span className={`hc-status-line ${isSaved ? 'is-saved' : ''}`}>
+            {isSaved ? 'Saved' : 'Not saved yet'}
+          </span>
+          <button
+            type="submit"
+            className="hc-btn hc-btn--primary"
+            disabled={trimmed === '' || isSaved}
+            style={{ minHeight: 44, padding: '0 18px' }}
+          >
             Save
           </button>
         </div>
@@ -74,11 +88,25 @@ export function Settings({ store, householdId }: Props) {
               Share it so your partner can join.
             </p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--sunk)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              background: 'var(--sunk)',
+              borderRadius: 'var(--radius-md)',
+              padding: '10px 12px',
+            }}
+          >
             <span className="hc-mono" style={{ flex: 1, minWidth: 0 }}>
               {householdId}
             </span>
-            <button type="button" className="hc-btn hc-btn--quiet" onClick={copyId} style={{ minHeight: 36, padding: '0 10px' }}>
+            <button
+              type="button"
+              className="hc-btn hc-btn--quiet"
+              onClick={copyId}
+              style={{ minHeight: 36, padding: '0 10px' }}
+            >
               {copied ? 'Copied' : 'Copy'}
             </button>
           </div>
@@ -104,7 +132,11 @@ export function Settings({ store, householdId }: Props) {
           <p className="hc-row-label" style={{ margin: 0 }}>
             Sign out
           </p>
-          <button type="button" className="hc-btn hc-btn--danger" onClick={() => supabase.auth.signOut()}>
+          <button
+            type="button"
+            className="hc-btn hc-btn--danger"
+            onClick={() => supabase.auth.signOut()}
+          >
             Sign out
           </button>
         </div>

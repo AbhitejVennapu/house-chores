@@ -41,7 +41,11 @@ export function ChoresManager({ store }: { store: ChoreStore }) {
           onCancel={() => setEditing(null)}
         />
       ) : (
-        <button type="button" className="hc-btn hc-btn--primary hc-btn--block" onClick={() => setEditing('new')}>
+        <button
+          type="button"
+          className="hc-btn hc-btn--primary hc-btn--block"
+          onClick={() => setEditing('new')}
+        >
           Add chore
         </button>
       )}
@@ -55,7 +59,7 @@ export function ChoresManager({ store }: { store: ChoreStore }) {
             <span className="hc-group-count">{count}</span>
           </div>
           <div className="hc-card">
-            {data.chores.map(chore => (
+            {data.chores.map((chore) => (
               <div key={chore.id} className="hc-item">
                 <div className="hc-item-main">
                   <p className="hc-item-name">{chore.name}</p>
@@ -63,10 +67,18 @@ export function ChoresManager({ store }: { store: ChoreStore }) {
                     {formatFrequency(chore.frequencyDays)} · {labels[chore.assignee]}
                   </span>
                 </div>
-                <button type="button" className="hc-btn hc-btn--quiet" onClick={() => setEditing(chore)}>
+                <button
+                  type="button"
+                  className="hc-btn hc-btn--quiet"
+                  onClick={() => setEditing(chore)}
+                >
                   Edit
                 </button>
-                <button type="button" className="hc-btn hc-btn--danger" onClick={() => handleDelete(chore)}>
+                <button
+                  type="button"
+                  className="hc-btn hc-btn--danger"
+                  onClick={() => handleDelete(chore)}
+                >
                   Delete
                 </button>
               </div>
