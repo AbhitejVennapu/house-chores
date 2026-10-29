@@ -1,22 +1,11 @@
-import http from 'node:http'
+import express from 'express'
 
-// Create a local server to send data to the client
-const server = http.createServer((req, res) => {
-  if (req.url?.split('?')[0] === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json' })
-    res.end(
-      JSON.stringify({
-        ok: true,
-      }),
-    )
-  } else {
-    res.writeHead(404, { 'Content-Type': 'application/json' })
-    res.end(
-      JSON.stringify({
-        error: 'Not Found',
-      }),
-    )
-  }
+const app = express()
+
+app.get('/health', (req, res) =>
+  res.status(200).json({ ok: true })
+)
+app.use((req, res) => { res.status(404).json({ error: 'Not Found' }) })
+app.listen(3000, () => {
+  console.log('listening on http://localhost:3000')
 })
-
-server.listen(3000)
