@@ -7,5 +7,5 @@ app.get('/health', (req, res) =>
 )
 app.use((req, res) => { res.status(404).json({ error: 'Not Found, Please try again' }) })
 app.listen(3000, () => {
-  console.log('listening on http://localhost:3000')
+  console.log('listened on http://localhost:3000')
 })
