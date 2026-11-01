@@ -28,6 +28,8 @@ Build our own backend and Postgres database as an alternative to Supabase. The a
 | Frontend integration | `DataSource` interface over `src/data/remote.ts`, chosen by env var                                                       | Keeps Supabase working.                                                                                        | 2026-10-28 |
 | Web framework        | Express 5                                                                                                                 | Biggest ecosystem and most tutorials. Thin layer over `node:http`. Hono and Fastify were the other candidates. | 2026-10-29 |
 | Step order           | Migrations in step 2. Tests start in step 3. Auth and households split into steps 7 and 8. Transactions taught in step 4. | Plan review. Migrations and tests were too late. Auth and households were one step.                            | 2026-10-28 |
+| Goal                 | Broad coverage of backend topics. Depth is set later.                                                                     | Learn as much as possible now. Once comfortable, strip the unneeded parts from the branch and merge it.        | 2026-11-01 |
+| Docker install       | Docker Desktop, installed with `brew install --cask docker`                                                               | Same app as the website download. `brew install docker` alone gives only the CLI, with no engine.             | 2026-11-01 |
 
 ## Roadmap
 
@@ -51,11 +53,13 @@ Status: `todo`, `doing`, `done`.
 
 ## Current step
 
-Step 2. Started. Concept stage: Docker, Postgres, migrations, env vars. Docker check pending. The server now runs on Express, with `/health` and a JSON 404 fallback. Next: move the hardcoded port `3000` into an env var, then Docker and Postgres.
+Step 2. Doing. Lesson 1 (Docker basics) is done. Docker Desktop is installed and `docker run --rm hello-world` works. The `docker images` and `docker ps -a` exercise is not done yet. The user will discuss next steps before continuing. The server still has the hardcoded port `3000`. Next lesson: run a Postgres container and connect with `psql`. Then volumes, Compose, the first migration, a migration runner, and `DATABASE_URL`.
 
 ## Session log
 
 Newest first.
+
+- 2026-11-01: Set the goal: broad coverage of backend topics, then strip and merge the branch later. Taught Docker basics (image, container, registry, port mapping). The user installed Docker Desktop with Homebrew (`brew install --cask docker`). Also covered opening Docker from the terminal with `open -a Docker`, and the client/daemon split. The user ran `docker run --rm hello-world` and it passed. Pending: `docker images` and `docker ps -a` with predictions. The user asked to document progress and discuss later. Notes are in `docs/learning/docker.md`.
 
 - 2026-10-29: Chose Express 5 as the web framework. Installed `express` and `@types/express` in `server/`. The user ported `GET /health` to `app.get` and wrote the JSON 404 fallback with `app.use`. Verified with `curl -i`. Also set up Prettier (root `.prettierrc`, `format` and `format:check` scripts, VS Code format on save), and learned the difference between oxlint (linter) and Prettier (formatter). Step 2 still in the concept stage.
 - 2026-10-28: Completed step 1. `server/` created with TypeScript and `tsx`. `server/src/index.ts` serves `GET /health` (`200`, `{"ok":true}`) and `404` for other paths. Verified with curl. Learned about `npm run dev`, `tsconfig.json`, and the editor format-on-save setup. Started step 2 at the concept stage.
@@ -64,7 +68,7 @@ Newest first.
 
 ## Open questions
 
-- Goal: learn concepts well enough to explain them, or build something production-ready? This sets the depth of steps 9, 11, and 13.
+- Depth of steps 9, 11, and 13 (CI, deploy, load balancer). The goal is broad coverage, so these get a basic pass at least. Decide the depth later.
 
 ## Concepts learned
 
@@ -88,8 +92,14 @@ Express setup (between steps 1 and 2):
 - A linter (oxlint) finds likely bugs. A formatter (Prettier) fixes layout. Root `npm run lint` already scans `server/`.
 - npm scripts run tools from `node_modules/.bin`, so `prettier` works in a script without `npx`.
 
-Step 2 (planned):
+Step 2 (in progress):
 
-- Docker runs a program in a container. Postgres runs in a container, so it need not be installed on the Mac.
+- Docker runs a program in a container, an isolated process with its own filesystem and network. Postgres can run in a container, so it need not be installed on the Mac.
+- Image: a read-only package of a program and its files. Container: a running instance of an image. Registry: where images are stored (Docker Hub by default).
+- `docker run --rm` removes the container when it exits. Deleting a container does not delete its image.
+- Port mapping `-p host:container` is needed before the Mac can reach a service inside a container.
+- The `docker` command is a client. It talks to a background daemon, which runs in a Linux VM on macOS. The app must be running first.
+- `open -a Docker` launches the app from the terminal.
+- `brew install --cask docker` installs Docker Desktop. `brew install docker` installs only the CLI.
 - A migration is a numbered SQL file. The database records which files ran.
 - Env vars keep settings such as `DATABASE_URL` out of the code.
